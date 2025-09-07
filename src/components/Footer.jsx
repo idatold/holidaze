@@ -4,15 +4,42 @@ import logo from "@/assets/holidazewhitelogo.svg";
 export default function Footer() {
   return (
     <footer className="mt-12 bg-[#006492] text-white">
-      <div className="container mx-auto px-4 py-10 text-center">
-        <img src={logo} alt="Holidaze" className="mx-auto h-8 mb-4" />
-        <div className="flex justify-center gap-6 mb-6">
-          <Link to="/" className="footer-link">Home</Link>
-          <Link to="/venues" className="footer-link">Venues</Link>
-          <Link to="/about" className="footer-link">About</Link>
-          <Link to="/login" className="footer-link">Login</Link>
+      <div className="container mx-auto px-4 pt-10 pb-4 text-center">
+
+        {/* Logo */}
+        <img
+          src={logo}
+          alt="Holidaze"
+          className="mx-auto w-[129px] h-[59px] mb-6"
+        />
+
+        {/* Navigation */}
+        <div className="flex justify-center gap-8 mb-6">
+          <Link to="/" className="text-base font-semibold hover:underline">
+            Home
+          </Link>
+          <Link
+            to="/venues"
+            className="text-base font-semibold hover:underline"
+          >
+            Venues
+          </Link>
+          <Link to="/about" className="text-base font-semibold hover:underline">
+            About
+          </Link>
+          <Link to="/login" className="text-base font-semibold hover:underline">
+            Login
+          </Link>
         </div>
-        <p className="text-white/70 text-[11px]">&copy; {new Date().getFullYear()} Holidaze. All rights reserved.</p>
+
+        {/* Divider line */}
+        <div className="w-full border-t border-white my-4"></div>
+
+        {/* Copyright */}
+        <p className="text-white text-sm italic mt-12">
+          &copy; {new Date().getFullYear()} <em>Holidaze™</em>. All rights
+          reserved.
+        </p>
       </div>
     </footer>
   );
