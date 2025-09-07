@@ -4,8 +4,9 @@ import Login from "@/routes/Auth/Login.jsx";
 import Register from "@/routes/Auth/Register.jsx";
 import Venues from "@/routes/Venues.jsx";
 import Venue from "@/routes/Venue.jsx";
-import DefaultLayout from "@/layouts/DefaultLayout.jsx"; // gradient
-import PlainLayout from "@/layouts/PlainLayout.jsx";     // plain
+import Profile from "@/routes/Profile.jsx";           // 👈 import
+import DefaultLayout from "@/layouts/DefaultLayout.jsx";
+import PlainLayout from "@/layouts/PlainLayout.jsx";
 
 export default function App() {
   return (
@@ -14,14 +15,14 @@ export default function App() {
         {/* Home: NO layout */}
         <Route index element={<Home />} />
 
-        {/* Pages WITH gradient */}
+        {/* Gradient + padded pages */}
         <Route element={<DefaultLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          {/* add other gradient pages here */}
+          <Route path="profile" element={<Profile />} />   {/* ✅ here */}
         </Route>
 
-        {/* Pages WITHOUT gradient */}
+        {/* Full-bleed pages */}
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />

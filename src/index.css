@@ -42,6 +42,11 @@ body { margin: 0; font-family: "Arsenal", ui-sans-serif, system-ui; }
     @apply bg-[#006492] text-white hover:bg-[#005880]
            focus:ring-[#267BA2] uppercase tracking-wide shadow;
   }
+  .btn-pink {
+    @apply bg-[#D23393] text-white hover:brightness-95
+           focus:ring-2 focus:ring-offset-2 focus:ring-[#F2A6CF]
+           rounded-[5px] px-6 py-3 text-sm font-semibold transition active:scale-[.99];
+  }n
 
   /* links on hero */
   .link-light {
