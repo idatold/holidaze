@@ -2,10 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Modal from "@/components/ui/Modal";
 
-// localStorage keys (so Navbar can read later)
-const AVATAR_KEY = "holidaze_avatar_url";
-const COVER_KEY = "holidaze_cover_url";
-const PINK = "#D23393";
+import {
+  AVATAR_KEY,
+  COVER_KEY,
+  PROFILE_NAME_KEY,
+  PROFILE_EMAIL_KEY,
+} from "@/lib/auth";
+
+import {
+  getMyProfile,
+  updateProfileMedia,
+} from "@/lib/authApi";
 
 export default function Profile() {
   const [user, setUser] = useState({
@@ -16,13 +23,40 @@ export default function Profile() {
     coverUrl: "",
   });
 
-  // Load persisted images (pretend API data)
   useEffect(() => {
+    // 1) Hydrate immediately from localStorage (set by Login)
+    const name = localStorage.getItem(PROFILE_NAME_KEY);
+    const email = localStorage.getItem(PROFILE_EMAIL_KEY);
+    const avatarUrl = localStorage.getItem(AVATAR_KEY);
+    const coverUrl = localStorage.getItem(COVER_KEY);
+
     setUser((u) => ({
       ...u,
-      avatarUrl: localStorage.getItem(AVATAR_KEY) || u.avatarUrl,
-      coverUrl: localStorage.getItem(COVER_KEY) || u.coverUrl,
+      name: name || u.name,
+      email: email || u.email,
+      avatarUrl: avatarUrl || u.avatarUrl,
+      coverUrl: coverUrl || u.coverUrl,
     }));
+
+    // 2) Fetch fresh profile from API (includes venueManager, avatar, banner)
+    if (name) {
+      getMyProfile(name, { bookings: true, venues: true })
+        .then((p) => {
+          setUser((u) => ({
+            ...u,
+            name: p?.name || u.name,
+            email: p?.email || u.email,
+            venueManager: Boolean(p?.venueManager),
+            avatarUrl: p?.avatar?.url || u.avatarUrl,
+            coverUrl: p?.banner?.url || u.coverUrl,
+          }));
+          if (p?.avatar?.url) localStorage.setItem(AVATAR_KEY, p.avatar.url);
+          if (p?.banner?.url) localStorage.setItem(COVER_KEY, p.banner.url);
+        })
+        .catch(() => {
+          // ignore; hydrated values still show
+        });
+    }
   }, []);
 
   // Modals state
@@ -34,15 +68,6 @@ export default function Profile() {
   const [avatarUrlInput, setAvatarUrlInput] = useState("");
   const [coverErr, setCoverErr] = useState("");
   const [avatarErr, setAvatarErr] = useState("");
-
-  function isValidUrl(str) {
-    try {
-      const u = new URL(str);
-      return u.protocol === "http:" || u.protocol === "https:";
-    } catch {
-      return false;
-    }
-  }
 
   // open modals with current values
   function openCover() {
@@ -56,26 +81,42 @@ export default function Profile() {
     setAvatarOpen(true);
   }
 
-  // Save handlers (URL only)
   function saveCover() {
-    if (!coverUrlInput || !isValidUrl(coverUrlInput)) {
-      setCoverErr("Image url is required");
-      return;
+    const name = localStorage.getItem(PROFILE_NAME_KEY);
+    if (!coverUrlInput) return setCoverOpen(false);
+
+    if (name) {
+      updateProfileMedia(name, { coverUrl: coverUrlInput })
+        .then((p) => {
+          const url = p?.banner?.url || coverUrlInput;
+          localStorage.setItem(COVER_KEY, url);
+          setUser((u) => ({ ...u, coverUrl: url }));
+        })
+        .finally(() => setCoverOpen(false));
+    } else {
+      localStorage.setItem(COVER_KEY, coverUrlInput);
+      setUser((u) => ({ ...u, coverUrl: coverUrlInput }));
+      setCoverOpen(false);
     }
-    localStorage.setItem(COVER_KEY, coverUrlInput);
-    setUser((u) => ({ ...u, coverUrl: coverUrlInput }));
-    setCoverOpen(false);
   }
 
   function saveAvatar() {
-    if (!avatarUrlInput || !isValidUrl(avatarUrlInput)) {
-      setAvatarErr("Image url is required");
-      return;
+    const name = localStorage.getItem(PROFILE_NAME_KEY);
+    if (!avatarUrlInput) return setAvatarOpen(false);
+
+    if (name) {
+      updateProfileMedia(name, { avatarUrl: avatarUrlInput })
+        .then((p) => {
+          const url = p?.avatar?.url || avatarUrlInput;
+          localStorage.setItem(AVATAR_KEY, url);
+          setUser((u) => ({ ...u, avatarUrl: url }));
+        })
+        .finally(() => setAvatarOpen(false));
+    } else {
+      localStorage.setItem(AVATAR_KEY, avatarUrlInput);
+      setUser((u) => ({ ...u, avatarUrl: avatarUrlInput }));
+      setAvatarOpen(false);
     }
-    localStorage.setItem(AVATAR_KEY, avatarUrlInput);
-    setUser((u) => ({ ...u, avatarUrl: avatarUrlInput }));
-    setAvatarOpen(false);
-    // Later: also update global user context so Navbar shows it immediately.
   }
 
   return (
@@ -200,114 +241,119 @@ export default function Profile() {
         </div>
       </div>
 
-{/* COVER MODAL (URL only) */}
-<Modal
-  open={coverOpen}
-  onClose={() => setCoverOpen(false)}
-  title="Edit header photo"
-  className="ring-2 ring-[#D23393]"
->
-  <div className="space-y-4">
-    {/* ocean-blue, bolder border + visible "Preview" when empty */}
-    <div className="relative aspect-[16/6] w-full overflow-hidden rounded border-4 border-[#006492] bg-white shadow-sm">
-      {coverUrlInput ? (
-        <img src={coverUrlInput} alt="Cover preview" className="h-full w-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-ocean/60">
-          Preview
+      {/* COVER MODAL */}
+      <Modal
+        open={coverOpen}
+        onClose={() => setCoverOpen(false)}
+        title="Edit header photo"
+        className="ring-2 ring-[#D23393]"
+      >
+        <div className="space-y-4">
+          <div className="relative aspect-[16/6] w-full overflow-hidden rounded border-4 border-[#006492] bg-white shadow-sm">
+            {coverUrlInput ? (
+              <img
+                src={coverUrlInput}
+                alt="Cover preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-ocean/60">
+                Preview
+              </div>
+            )}
+          </div>
+
+          <input
+            type="url"
+            value={coverUrlInput}
+            onChange={(e) => {
+              setCoverUrlInput(e.target.value);
+              if (coverErr) setCoverErr("");
+            }}
+            placeholder="https://example.com/cover-image.jpg"
+            className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
+          />
+
+          {coverErr && (
+            <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
+              <span className="text-lg">⦿</span>
+              <span className="text-sm">{coverErr}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <button
+              className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8]"
+              onClick={() => setCoverOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-pink w-full uppercase shadow"
+              onClick={saveCover}
+            >
+              Update header
+            </button>
+          </div>
         </div>
-      )}
-    </div>
+      </Modal>
 
-    <input
-      type="url"
-      value={coverUrlInput}
-      onChange={(e) => { setCoverUrlInput(e.target.value); if (coverErr) setCoverErr(""); }}
-      placeholder="https://example.com/cover-image.jpg"
-      className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
-    />
-
-    {coverErr && (
-      <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
-        <span className="text-lg">⦿</span>
-        <span className="text-sm">{coverErr}</span>
-      </div>
-    )}
-
-    {/* Buttons: outlined pink + filled pink */}
-    <div className="grid grid-cols-2 gap-4 pt-1">
-      <button
-        className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8]"
-        onClick={() => setCoverOpen(false)}
+      {/* AVATAR MODAL */}
+      <Modal
+        open={avatarOpen}
+        onClose={() => setAvatarOpen(false)}
+        title="Edit profile picture"
+        className="ring-2 ring-[#D23393]"
       >
-        Cancel
-      </button>
-      <button
-        className="btn btn-pink w-full uppercase shadow"
-        onClick={saveCover}
-      >
-        Update header
-      </button>
-    </div>
-  </div>
-</Modal>
+        <div className="space-y-4">
+          <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-[#006492] bg-[#006492] shadow-sm">
+            {avatarUrlInput ? (
+              <img
+                src={avatarUrlInput}
+                alt="Avatar preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/90">
+                Preview
+              </div>
+            )}
+          </div>
 
+          <input
+            type="url"
+            value={avatarUrlInput}
+            onChange={(e) => {
+              setAvatarUrlInput(e.target.value);
+              if (avatarErr) setAvatarErr("");
+            }}
+            placeholder="https://example.com/avatar.jpg"
+            className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
+          />
 
+          {avatarErr && (
+            <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
+              <span className="text-lg">⦿</span>
+              <span className="text-sm">{avatarErr}</span>
+            </div>
+          )}
 
-   {/* AVATAR MODAL (URL only) */}
-<Modal
-  open={avatarOpen}
-  onClose={() => setAvatarOpen(false)}
-  title="Edit profile picture"
-  className="ring-2 ring-[#D23393]"
->
-  <div className="space-y-4">
-    {/* ocean-blue, bolder circle ring + "Preview" when empty */}
-    <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-[#006492] bg-[#006492] shadow-sm">
-      {avatarUrlInput ? (
-        <img src={avatarUrlInput} alt="Avatar preview" className="h-full w-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-white/90">
-          Preview
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <button
+              className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8]"
+              onClick={() => setAvatarOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-pink w-full uppercase shadow"
+              onClick={saveAvatar}
+            >
+              Update photo
+            </button>
+          </div>
         </div>
-      )}
-    </div>
-
-    <input
-      type="url"
-      value={avatarUrlInput}
-      onChange={(e) => { setAvatarUrlInput(e.target.value); if (avatarErr) setAvatarErr(""); }}
-      placeholder="https://example.com/avatar.jpg"
-      className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
-    />
-
-    {avatarErr && (
-      <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
-        <span className="text-lg">⦿</span>
-        <span className="text-sm">{avatarErr}</span>
-      </div>
-    )}
-
-    {/* Buttons: outlined pink + filled pink */}
-    <div className="grid grid-cols-2 gap-4 pt-1">
-      <button
-        className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8]"
-        onClick={() => setAvatarOpen(false)}
-      >
-        Cancel
-      </button>
-      <button
-        className="btn btn-pink w-full uppercase shadow"
-        onClick={saveAvatar}
-      >
-        Update photo
-      </button>
-    </div>
-  </div>
-</Modal>
-
-
-
+      </Modal>
     </div>
   );
 }
@@ -325,7 +371,11 @@ function EmptyState({ text, cta }) {
 function PencilIcon({ className = "h-4 w-4" }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
       <path d="M14.06 4.19l3.75 3.75" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
