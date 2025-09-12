@@ -9,10 +9,17 @@ import {
   PROFILE_EMAIL_KEY,
 } from "@/lib/auth";
 
-import {
-  getMyProfile,
-  updateProfileMedia,
-} from "@/lib/authApi";
+import { getMyProfile, updateProfileMedia } from "@/lib/authApi";
+
+/* inline pencil icon */
+function PencilIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M14.06 4.19l3.75 3.75" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
 
 export default function Profile() {
   const [user, setUser] = useState({
@@ -24,7 +31,7 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    // 1) Hydrate immediately from localStorage (set by Login)
+    // 1) hydrate from localStorage
     const name = localStorage.getItem(PROFILE_NAME_KEY);
     const email = localStorage.getItem(PROFILE_EMAIL_KEY);
     const avatarUrl = localStorage.getItem(AVATAR_KEY);
@@ -38,7 +45,7 @@ export default function Profile() {
       coverUrl: coverUrl || u.coverUrl,
     }));
 
-    // 2) Fetch fresh profile from API (includes venueManager, avatar, banner)
+    // 2) fetch fresh from API
     if (name) {
       getMyProfile(name, { bookings: true, venues: true })
         .then((p) => {
@@ -53,23 +60,20 @@ export default function Profile() {
           if (p?.avatar?.url) localStorage.setItem(AVATAR_KEY, p.avatar.url);
           if (p?.banner?.url) localStorage.setItem(COVER_KEY, p.banner.url);
         })
-        .catch(() => {
-          // ignore; hydrated values still show
-        });
+        .catch(() => {});
     }
   }, []);
 
-  // Modals state
+  // modals
   const [coverOpen, setCoverOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
 
-  // URL inputs + validation errors
+  // inputs + errors
   const [coverUrlInput, setCoverUrlInput] = useState("");
   const [avatarUrlInput, setAvatarUrlInput] = useState("");
   const [coverErr, setCoverErr] = useState("");
   const [avatarErr, setAvatarErr] = useState("");
 
-  // open modals with current values
   function openCover() {
     setCoverUrlInput(user.coverUrl || "");
     setCoverErr("");
@@ -91,11 +95,14 @@ export default function Profile() {
           const url = p?.banner?.url || coverUrlInput;
           localStorage.setItem(COVER_KEY, url);
           setUser((u) => ({ ...u, coverUrl: url }));
+          // notify other parts (e.g., Navbar) if needed
+          window.dispatchEvent(new Event("holidaze:profile-updated"));
         })
         .finally(() => setCoverOpen(false));
     } else {
       localStorage.setItem(COVER_KEY, coverUrlInput);
       setUser((u) => ({ ...u, coverUrl: coverUrlInput }));
+      window.dispatchEvent(new Event("holidaze:profile-updated"));
       setCoverOpen(false);
     }
   }
@@ -110,11 +117,13 @@ export default function Profile() {
           const url = p?.avatar?.url || avatarUrlInput;
           localStorage.setItem(AVATAR_KEY, url);
           setUser((u) => ({ ...u, avatarUrl: url }));
+          window.dispatchEvent(new Event("holidaze:profile-updated"));
         })
         .finally(() => setAvatarOpen(false));
     } else {
       localStorage.setItem(AVATAR_KEY, avatarUrlInput);
       setUser((u) => ({ ...u, avatarUrl: avatarUrlInput }));
+      window.dispatchEvent(new Event("holidaze:profile-updated"));
       setAvatarOpen(false);
     }
   }
@@ -138,7 +147,6 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Edit cover button (pen) */}
           <button
             onClick={openCover}
             className="absolute right-3 top-3 inline-flex items-center gap-2 rounded bg-white/95 px-3 py-1 text-sm text-[#D23393] shadow ring-1 ring-[#D23393] hover:bg-white"
@@ -150,7 +158,6 @@ export default function Profile() {
 
         {/* Avatar row + name + toggle */}
         <div className="px-6 pb-6 pt-0">
-          {/* Avatar - overlaps the cover */}
           <div className="relative -mt-10 flex flex-col items-center">
             <div className="relative h-24 w-24 rounded-full border-4 border-white bg-[#E7EEF6] shadow">
               {user.avatarUrl ? (
@@ -166,7 +173,6 @@ export default function Profile() {
                 </div>
               )}
 
-              {/* Edit avatar button (pen) */}
               <button
                 onClick={openAvatar}
                 aria-label="Edit profile picture"
@@ -176,12 +182,10 @@ export default function Profile() {
               </button>
             </div>
 
-            {/* Name */}
             <div className="mt-3 text-center">
               <h1 className="font-higuen text-ocean text-2xl">{user.name}</h1>
             </div>
 
-            {/* Venue manager toggle */}
             <div className="mt-3 flex items-center gap-2">
               <span className="text-sm text-ocean">Venue manager</span>
               <button
@@ -210,11 +214,7 @@ export default function Profile() {
               </h2>
               <EmptyState
                 text="No bookings yet."
-                cta={
-                  <Link to="/venues" className="underline text-ocean">
-                    Browse venues
-                  </Link>
-                }
+                cta={<Link to="/venues" className="underline text-ocean">Browse venues</Link>}
               />
             </section>
 
@@ -225,11 +225,7 @@ export default function Profile() {
               {user.venueManager ? (
                 <EmptyState
                   text="You haven’t created any venues yet."
-                  cta={
-                    <Link to="/venues/create" className="btn btn-pink mt-2">
-                      Create venue
-                    </Link>
-                  }
+                  cta={<Link to="/venues/create" className="btn btn-pink mt-2">Create venue</Link>}
                 />
               ) : (
                 <p className="text-center text-sm text-ocean/80">
@@ -251,11 +247,7 @@ export default function Profile() {
         <div className="space-y-4">
           <div className="relative aspect-[16/6] w-full overflow-hidden rounded border-4 border-[#006492] bg-white shadow-sm">
             {coverUrlInput ? (
-              <img
-                src={coverUrlInput}
-                alt="Cover preview"
-                className="h-full w-full object-cover"
-              />
+              <img src={coverUrlInput} alt="Cover preview" className="h-full w-full object-cover" />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-ocean/60">
                 Preview
@@ -266,10 +258,7 @@ export default function Profile() {
           <input
             type="url"
             value={coverUrlInput}
-            onChange={(e) => {
-              setCoverUrlInput(e.target.value);
-              if (coverErr) setCoverErr("");
-            }}
+            onChange={(e) => { setCoverUrlInput(e.target.value); if (coverErr) setCoverErr(""); }}
             placeholder="https://example.com/cover-image.jpg"
             className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
           />
@@ -288,10 +277,7 @@ export default function Profile() {
             >
               Cancel
             </button>
-            <button
-              className="btn btn-pink w-full uppercase shadow"
-              onClick={saveCover}
-            >
+            <button className="btn btn-pink w-full uppercase shadow" onClick={saveCover}>
               Update header
             </button>
           </div>
@@ -308,11 +294,7 @@ export default function Profile() {
         <div className="space-y-4">
           <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-[#006492] bg-[#006492] shadow-sm">
             {avatarUrlInput ? (
-              <img
-                src={avatarUrlInput}
-                alt="Avatar preview"
-                className="h-full w-full object-cover"
-              />
+              <img src={avatarUrlInput} alt="Avatar preview" className="h-full w-full object-cover" />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-white/90">
                 Preview
@@ -323,10 +305,7 @@ export default function Profile() {
           <input
             type="url"
             value={avatarUrlInput}
-            onChange={(e) => {
-              setAvatarUrlInput(e.target.value);
-              if (avatarErr) setAvatarErr("");
-            }}
+            onChange={(e) => { setAvatarUrlInput(e.target.value); if (avatarErr) setAvatarErr(""); }}
             placeholder="https://example.com/avatar.jpg"
             className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
           />
@@ -345,10 +324,7 @@ export default function Profile() {
             >
               Cancel
             </button>
-            <button
-              className="btn btn-pink w-full uppercase shadow"
-              onClick={saveAvatar}
-            >
+            <button className="btn btn-pink w-full uppercase shadow" onClick={saveAvatar}>
               Update photo
             </button>
           </div>
@@ -364,19 +340,5 @@ function EmptyState({ text, cta }) {
       <p>{text}</p>
       {cta && <div className="mt-2">{cta}</div>}
     </div>
-  );
-}
-
-/* inline pencil icon */
-function PencilIcon({ className = "h-4 w-4" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path d="M14.06 4.19l3.75 3.75" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
   );
 }

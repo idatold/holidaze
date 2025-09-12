@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { loginUser /*, getMyProfile (optional) */ } from "@/lib/authApi";
+import { loginUser } from "@/lib/authApi";
 import { storeAccessToken, storeProfileBasics } from "@/lib/auth";
 
 export default function Login() {
@@ -16,14 +16,13 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await loginUser({ email, password });
-      // user = { name, email, avatar: {url,alt}, banner: {url,alt}, accessToken, venueManager }
-
+      // { name, email, avatar:{url}, banner:{url}, accessToken, venueManager }
       if (!user?.accessToken) throw new Error("No access token returned.");
 
-      // 1) store token for axios
+      // 1) token for axios
       storeAccessToken(user.accessToken);
 
-      // 2) store basics so Profile/Navbar can read immediately
+      // 2) cache basics for Profile/Navbar
       storeProfileBasics({
         name: user.name,
         email: user.email,
@@ -31,7 +30,6 @@ export default function Login() {
         coverUrl: user.banner?.url ?? null,
       });
 
-      // 3) go to profile
       navigate("/profile");
     } catch (e) {
       setErr(e?.response?.data?.message || e.message || "Login failed");

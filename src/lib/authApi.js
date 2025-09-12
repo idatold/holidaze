@@ -1,24 +1,43 @@
+// src/lib/authApi.js
 import { api } from "./api";
 
-// Already done, just for clarity:
-// Login with extra data included in response
-export async function loginUser({ email, password }) {
-  const { data } = await api.post("/auth/login?_holidaze=true", { email, password });
-  return data?.data ?? data; // { name, email, avatar, banner, accessToken, venueManager }
+// POST /auth/register
+export async function registerUser({ name, email, password, venueManager }) {
+  const { data } = await api.post("/auth/register", {
+    name,
+    email,
+    password,
+    venueManager, // optional boolean
+  });
+  // API returns { data: { ...user } }
+  return data?.data ?? data;
 }
 
-// Get your profile (optionally include bookings/venues)
+// POST /auth/login (include extra holidaze fields)
+export async function loginUser({ email, password }) {
+  const { data } = await api.post("/auth/login?_holidaze=true", {
+    email,
+    password,
+  });
+  // API returns { data: { name, email, avatar, banner, accessToken, venueManager }, meta: {} }
+  return data?.data ?? data;
+}
+
+// GET /holidaze/profiles/{name}?_bookings&_venues
 export async function getMyProfile(name, { bookings = false, venues = false } = {}) {
   const qs = new URLSearchParams();
   if (bookings) qs.set("_bookings", "true");
   if (venues) qs.set("_venues", "true");
-  const q = qs.toString() ? `?${qs}` : "";
-  const { data } = await api.get(`/holidaze/profiles/${encodeURIComponent(name)}${q}`);
+  const suffix = qs.toString() ? `?${qs}` : "";
+  const { data } = await api.get(`/holidaze/profiles/${encodeURIComponent(name)}${suffix}`);
   return data?.data ?? data;
 }
 
-// Update media (avatar/banner)
-export async function updateProfileMedia(name, { avatarUrl, avatarAlt = "", coverUrl, coverAlt = "" } = {}) {
+// PUT /holidaze/profiles/{name}/media  (avatar/banner updates)
+export async function updateProfileMedia(
+  name,
+  { avatarUrl, avatarAlt = "", coverUrl, coverAlt = "" } = {}
+) {
   const body = {};
   if (avatarUrl) body.avatar = { url: avatarUrl, alt: avatarAlt };
   if (coverUrl)  body.banner = { url: coverUrl,  alt: coverAlt  };
