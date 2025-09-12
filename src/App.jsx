@@ -4,9 +4,10 @@ import Login from "@/routes/Auth/Login.jsx";
 import Register from "@/routes/Auth/Register.jsx";
 import Venues from "@/routes/Venues.jsx";
 import Venue from "@/routes/Venue.jsx";
-import Profile from "@/routes/Profile.jsx";           // 👈 import
+import Profile from "@/routes/Profile.jsx";
 import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
+import RequireAuth from "@/routes/guards/RequireAuth.jsx"; // 👈 add this
 
 export default function App() {
   return (
@@ -19,7 +20,14 @@ export default function App() {
         <Route element={<DefaultLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          <Route path="profile" element={<Profile />} />   {/* ✅ here */}
+          <Route
+            path="profile"
+            element={
+              <RequireAuth>
+                <Profile />
+              </RequireAuth>
+            }
+          />
         </Route>
 
         {/* Full-bleed pages */}
