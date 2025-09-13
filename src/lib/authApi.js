@@ -55,3 +55,11 @@ export async function updateProfileMedia(
   return data?.data ?? data;
 }
 
+// PUT /holidaze/profiles/:name  { venueManager: boolean } — use axios `api` for consistency
+export async function updateVenueManagerStatus(name, { venueManager }) {
+  const { data } = await api.put(
+    `/holidaze/profiles/${encodeURIComponent(name)}`,
+    { venueManager }
+  );
+  return data?.data ?? data;
+}
