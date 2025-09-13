@@ -11,6 +11,45 @@ import {
 
 import { getMyProfile, updateProfileMedia } from "@/lib/authApi";
 
+/* ─────────────────────────────  Hi-DPI helpers  ───────────────────────────── */
+const USE_HIDPI = true;
+
+// Add width/DPR params for Unsplash / imgix / Cloudinary when possible
+function hiDpi(url, w = 1600) {
+  if (!url) return url;
+  if (!USE_HIDPI) return url;
+  try {
+    const u = new URL(url);
+    const dpr = window.devicePixelRatio > 1 ? 2 : 1;
+
+    // Unsplash
+    if (u.hostname.includes("images.unsplash.com")) {
+      u.searchParams.set("auto", "format");
+      u.searchParams.set("fit", "crop");
+      u.searchParams.set("w", String(w));
+      u.searchParams.set("q", "80");
+      u.searchParams.set("dpr", String(dpr));
+      return u.toString();
+    }
+
+    // imgix / Cloudinary-ish (safe no-op if ignored)
+    if (u.hostname.includes("imgix") || u.hostname.includes("cloudinary")) {
+      u.searchParams.set("w", String(w));
+      u.searchParams.set("dpr", String(dpr));
+      return u.toString();
+    }
+
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+function buildSrcSet(url, widths = []) {
+  if (!url) return undefined;
+  return widths.map((w) => `${hiDpi(url, w)} ${w}w`).join(", ");
+}
+
 /* inline pencil icon */
 function PencilIcon({ className = "h-4 w-4" }) {
   return (
@@ -68,8 +107,7 @@ export default function Profile() {
   const [coverOpen, setCoverOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [savingCover, setSavingCover] = useState(false);
-const [savingAvatar, setSavingAvatar] = useState(false);
-
+  const [savingAvatar, setSavingAvatar] = useState(false);
 
   // inputs + errors
   const [coverUrlInput, setCoverUrlInput] = useState("");
@@ -89,67 +127,69 @@ const [savingAvatar, setSavingAvatar] = useState(false);
   }
 
   async function saveCover() {
-  const name = localStorage.getItem(PROFILE_NAME_KEY);
-  const raw = (coverUrlInput || "").trim();
+    const name = localStorage.getItem(PROFILE_NAME_KEY) || user.name;
+    const raw = (coverUrlInput || "").trim();
 
-  if (!raw) { setCoverOpen(false); return; }
-  if (!/^https?:\/\//i.test(raw)) {
-    setCoverErr("Enter a valid URL starting with http:// or https://");
-    return;
-  }
-
-  setSavingCover(true);
-  try {
-    let url = raw;
-
-    // Persist to API if logged in (we know profile name)
-    if (name) {
-      const p = await updateProfileMedia(name, { coverUrl: raw });
-      url = p?.banner?.url || raw; // fallback to what user typed
+    if (!raw) { setCoverOpen(false); return; }
+    if (!/^https?:\/\//i.test(raw)) {
+      setCoverErr("Enter a valid URL starting with http:// or https://");
+      return;
     }
 
-    // Cache + update UI
-    localStorage.setItem(COVER_KEY, url);
-    setUser((u) => ({ ...u, coverUrl: url }));
-    window.dispatchEvent(new Event("holidaze:profile-updated"));
-    setCoverOpen(false);
-  } catch (e) {
-    setCoverErr(e?.response?.data?.message || e.message || "Could not update header");
-  } finally {
-    setSavingCover(false);
-  }
-}
+    setSavingCover(true);
+    try {
+      let url = raw;
 
-async function saveAvatar() {
-  const name = localStorage.getItem(PROFILE_NAME_KEY);
-  const raw = (avatarUrlInput || "").trim();
+      if (name) {
+        const p = await updateProfileMedia(name, { coverUrl: raw });
+        url = p?.banner?.url || raw;
+      }
 
-  if (!raw) { setAvatarOpen(false); return; }
-  if (!/^https?:\/\//i.test(raw)) {
-    setAvatarErr("Enter a valid URL starting with http:// or https://");
-    return;
+      localStorage.setItem(COVER_KEY, url);
+      setUser((u) => ({ ...u, coverUrl: url }));
+      window.dispatchEvent(new Event("holidaze:profile-updated"));
+      setCoverOpen(false);
+    } catch (e) {
+      setCoverErr(e?.response?.data?.message || e.message || "Could not update header");
+    } finally {
+      setSavingCover(false);
+    }
   }
 
-  setSavingAvatar(true);
-  try {
-    let url = raw;
+  async function saveAvatar() {
+    const name = localStorage.getItem(PROFILE_NAME_KEY) || user.name;
+    const raw = (avatarUrlInput || "").trim();
 
-    if (name) {
-      const p = await updateProfileMedia(name, { avatarUrl: raw });
-      url = p?.avatar?.url || raw;
+    if (!raw) { setAvatarOpen(false); return; }
+    if (!/^https?:\/\//i.test(raw)) {
+      setAvatarErr("Enter a valid URL starting with http:// or https://");
+      return;
     }
 
-    localStorage.setItem(AVATAR_KEY, url);
-    setUser((u) => ({ ...u, avatarUrl: url }));
-    window.dispatchEvent(new Event("holidaze:profile-updated"));
-    setAvatarOpen(false);
-  } catch (e) {
-    setAvatarErr(e?.response?.data?.message || e.message || "Could not update photo");
-  } finally {
-    setSavingAvatar(false);
-  }
-}
+    setSavingAvatar(true);
+    try {
+      let url = raw;
 
+      if (name) {
+        const p = await updateProfileMedia(name, { avatarUrl: raw });
+        url = p?.avatar?.url || raw;
+      }
+
+      localStorage.setItem(AVATAR_KEY, url);
+      setUser((u) => ({ ...u, avatarUrl: url }));
+      window.dispatchEvent(new Event("holidaze:profile-updated"));
+      setAvatarOpen(false);
+    } catch (e) {
+      setAvatarErr(e?.response?.data?.message || e.message || "Could not update photo");
+    } finally {
+      setSavingAvatar(false);
+    }
+  }
+
+  // Precompute responsive sources for cover
+  const coverSrc = hiDpi(user.coverUrl, 1600);
+  const coverSrcSet = buildSrcSet(user.coverUrl, [800, 1600, 2400]);
+  const coverSizes = "(min-width: 768px) 768px, 100vw";
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -159,9 +199,13 @@ async function saveAvatar() {
         <div className="relative h-44 w-full bg-[#E6F2FA] md:h-56">
           {user.coverUrl ? (
             <img
-              src={user.coverUrl}
+              src={coverSrc}
+              srcSet={coverSrcSet}
+              sizes={coverSizes}
               alt="Profile header"
               className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
               draggable="false"
             />
           ) : (
@@ -185,9 +229,11 @@ async function saveAvatar() {
             <div className="relative h-24 w-24 rounded-full border-4 border-white bg-[#E7EEF6] shadow">
               {user.avatarUrl ? (
                 <img
-                  src={user.avatarUrl}
+                  src={hiDpi(user.avatarUrl, 256)}
                   alt={`${user.name} avatar`}
                   className="h-full w-full rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                   draggable="false"
                 />
               ) : (
@@ -260,110 +306,117 @@ async function saveAvatar() {
         </div>
       </div>
 
+      {/* COVER MODAL */}
       <Modal
-  open={coverOpen}
-  onClose={() => setCoverOpen(false)}
-  title="Edit header photo"
-  className="ring-2 ring-[#D23393]"
->
-  <div className="space-y-4">
-    <div className="relative aspect-[16/6] w-full overflow-hidden rounded border-4 border-[#006492] bg-white shadow-sm">
-      {coverUrlInput ? (
-        <img src={coverUrlInput} alt="Cover preview" className="h-full w-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-ocean/60">
-          Preview
+        open={coverOpen}
+        onClose={() => { if (!savingCover) setCoverOpen(false); }}
+        title="Edit header photo"
+        className="ring-2 ring-[#D23393]"
+      >
+        <div className="space-y-4">
+          <div className="relative aspect-[16/6] w-full overflow-hidden rounded border-3 border-[#006492] bg-white shadow-sm">
+            {coverUrlInput ? (
+              <img
+                src={hiDpi(coverUrlInput, 1600)}
+                alt="Cover preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-ocean/60">
+                Preview
+              </div>
+            )}
+          </div>
+
+          <input
+            type="url"
+            value={coverUrlInput}
+            onChange={(e) => { setCoverUrlInput(e.target.value); if (coverErr) setCoverErr(""); }}
+            placeholder="https://images.unsplash.com/...&w=1600"
+            className="w-full rounded-[5px] border border-[#D23393] bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
+          />
+
+          {coverErr && (
+            <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393] px-3 py-2 text-[#8A114E]">
+              <span className="text-lg">⦿</span>
+              <span className="text-sm">{coverErr}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <button
+              className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8] disabled:opacity-60"
+              onClick={() => setCoverOpen(false)}
+              disabled={savingCover}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-pink w-full uppercase shadow disabled:opacity-60"
+              onClick={saveCover}
+              disabled={savingCover}
+            >
+              {savingCover ? "Saving…" : "Update header"}
+            </button>
+          </div>
         </div>
-      )}
-    </div>
+      </Modal>
 
-    <input
-      type="url"
-      value={coverUrlInput}
-      onChange={(e) => { setCoverUrlInput(e.target.value); if (coverErr) setCoverErr(""); }}
-      placeholder="https://example.com/cover-image.jpg"
-      className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
-    />
-
-    {coverErr && (
-      <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
-        <span className="text-lg">⦿</span>
-        <span className="text-sm">{coverErr}</span>
-      </div>
-    )}
-
-    {/* ⬇️ BUTTONS are here */}
-    <div className="grid grid-cols-2 gap-4 pt-1">
-      <button
-        className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8] disabled:opacity-60"
-        onClick={() => setCoverOpen(false)}
-        disabled={savingCover}
+      {/* AVATAR MODAL */}
+      <Modal
+        open={avatarOpen}
+        onClose={() => { if (!savingAvatar) setAvatarOpen(false); }}
+        title="Edit profile picture"
+        className="ring-2 ring-[#D23393]"
       >
-        Cancel
-      </button>
-      <button
-        className="btn btn-pink w-full uppercase shadow disabled:opacity-60"
-        onClick={saveCover}
-        disabled={savingCover}
-      >
-        {savingCover ? "Saving…" : "Update header"}
-      </button>
-    </div>
-  </div>
-</Modal>
+        <div className="space-y-4">
+          <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-3 border-[#006492] bg-[#006492] shadow-sm">
+            {avatarUrlInput ? (
+              <img
+                src={hiDpi(avatarUrlInput, 256)}
+                alt="Avatar preview"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/90">
+                Preview
+              </div>
+            )}
+          </div>
 
-     <Modal
-  open={avatarOpen}
-  onClose={() => setAvatarOpen(false)}
-  title="Edit profile picture"
-  className="ring-2 ring-[#D23393]"
->
-  <div className="space-y-4">
-    <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-4 border-[#006492] bg-[#006492] shadow-sm">
-      {avatarUrlInput ? (
-        <img src={avatarUrlInput} alt="Avatar preview" className="h-full w-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-white/90">
-          Preview
+          <input
+            type="url"
+            value={avatarUrlInput}
+            onChange={(e) => { setAvatarUrlInput(e.target.value); if (avatarErr) setAvatarErr(""); }}
+            placeholder="https://images.unsplash.com/...&w=256"
+            className="w-full rounded-[5px] border border-[#D23393] bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
+          />
+
+          {avatarErr && (
+            <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393] px-3 py-2 text-[#8A114E]">
+              <span className="text-lg">⦿</span>
+              <span className="text-sm">{avatarErr}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <button
+              className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8] disabled:opacity-60"
+              onClick={() => setAvatarOpen(false)}
+              disabled={savingAvatar}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-pink w-full uppercase shadow disabled:opacity-60"
+              onClick={saveAvatar}
+              disabled={savingAvatar}
+            >
+              {savingAvatar ? "Saving…" : "Update photo"}
+            </button>
+          </div>
         </div>
-      )}
-    </div>
-
-    <input
-      type="url"
-      value={avatarUrlInput}
-      onChange={(e) => { setAvatarUrlInput(e.target.value); if (avatarErr) setAvatarErr(""); }}
-      placeholder="https://example.com/avatar.jpg"
-      className="w-full rounded-[5px] border border-[#D23393]/40 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D23393]"
-    />
-
-    {avatarErr && (
-      <div className="flex items-center gap-2 rounded-[5px] border border-[#D23393] bg-[#D23393]/10 px-3 py-2 text-[#8A114E]">
-        <span className="text-lg">⦿</span>
-        <span className="text-sm">{avatarErr}</span>
-      </div>
-    )}
-
-    {/* ⬇️ BUTTONS are here */}
-    <div className="grid grid-cols-2 gap-4 pt-1">
-      <button
-        className="btn w-full uppercase shadow border-2 border-[#D23393] text-[#D23393] hover:bg-[#FFF2F8] disabled:opacity-60"
-        onClick={() => setAvatarOpen(false)}
-        disabled={savingAvatar}
-      >
-        Cancel
-      </button>
-      <button
-        className="btn btn-pink w-full uppercase shadow disabled:opacity-60"
-        onClick={saveAvatar}
-        disabled={savingAvatar}
-      >
-        {savingAvatar ? "Saving…" : "Update photo"}
-      </button>
-    </div>
-  </div>
-</Modal>
-
+      </Modal>
     </div>
   );
 }
