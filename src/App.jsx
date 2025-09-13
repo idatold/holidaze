@@ -4,8 +4,10 @@ import Login from "@/routes/Auth/Login.jsx";
 import Register from "@/routes/Auth/Register.jsx";
 import Venues from "@/routes/Venues.jsx";
 import Venue from "@/routes/Venue.jsx";
-import DefaultLayout from "@/layouts/DefaultLayout.jsx"; // gradient
-import PlainLayout from "@/layouts/PlainLayout.jsx";     // plain
+import Profile from "@/routes/Profile.jsx";
+import DefaultLayout from "@/layouts/DefaultLayout.jsx";
+import PlainLayout from "@/layouts/PlainLayout.jsx";
+import RequireAuth from "@/routes/guards/RequireAuth.jsx"; // 👈 add this
 
 export default function App() {
   return (
@@ -14,14 +16,21 @@ export default function App() {
         {/* Home: NO layout */}
         <Route index element={<Home />} />
 
-        {/* Pages WITH gradient */}
+        {/* Gradient + padded pages */}
         <Route element={<DefaultLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          {/* add other gradient pages here */}
+          <Route
+            path="profile"
+            element={
+              <RequireAuth>
+                <Profile />
+              </RequireAuth>
+            }
+          />
         </Route>
 
-        {/* Pages WITHOUT gradient */}
+        {/* Full-bleed pages */}
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
