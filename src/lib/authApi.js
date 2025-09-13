@@ -33,14 +33,25 @@ export async function getMyProfile(name, { bookings = false, venues = false } = 
   return data?.data ?? data;
 }
 
-// PUT /holidaze/profiles/{name}/media  (avatar/banner updates)
+// PUT /holidaze/profiles/:name  (avatar/banner/venueManager/bio)
 export async function updateProfileMedia(
   name,
-  { avatarUrl, avatarAlt = "", coverUrl, coverAlt = "" } = {}
+  { avatarUrl, avatarAlt = "", coverUrl, coverAlt = "", venueManager, bio } = {}
 ) {
   const body = {};
-  if (avatarUrl) body.avatar = { url: avatarUrl, alt: avatarAlt };
-  if (coverUrl)  body.banner = { url: coverUrl,  alt: coverAlt  };
-  const { data } = await api.put(`/holidaze/profiles/${encodeURIComponent(name)}/media`, body);
+  if (avatarUrl) body.avatar = { url: avatarUrl, alt: avatarAlt ?? "" };
+  if (coverUrl)  body.banner = { url: coverUrl,  alt: coverAlt  ?? "" };
+  if (typeof venueManager === "boolean") body.venueManager = venueManager;
+  if (typeof bio === "string") body.bio = bio;
+
+  if (!Object.keys(body).length) {
+    throw new Error("No changes to send.");
+  }
+
+  const { data } = await api.put(
+    `/holidaze/profiles/${encodeURIComponent(name)}`,
+    body
+  );
   return data?.data ?? data;
 }
+
