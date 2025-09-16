@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "@/lib/authApi";
 import { storeAccessToken, storeProfileBasics } from "@/lib/auth";
+import toast from "@/lib/toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,6 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await loginUser({ email, password });
-      // { name, email, avatar:{url}, banner:{url}, accessToken, venueManager }
       if (!user?.accessToken) throw new Error("No access token returned.");
 
       // 1) token for axios
@@ -30,9 +30,12 @@ export default function Login() {
         coverUrl: user.banner?.url ?? null,
       });
 
+      toast.miniSuccess(`Welcome, ${user.name}`);
       navigate("/profile");
     } catch (e) {
-      setErr(e?.response?.data?.message || e.message || "Login failed");
+      const m = e?.response?.data?.message || e.message || "Login failed";
+      setErr(m);
+      toast.error(m);
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ export default function Login() {
           </div>
 
           {err && (
-            <p className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700" aria-live="polite">
               {err}
             </p>
           )}

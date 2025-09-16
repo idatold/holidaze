@@ -1,18 +1,40 @@
 import { useState } from "react";
 import { getMyProfile, updateVenueManagerStatus } from "@/lib/authApi";
-import { AVATAR_KEY, COVER_KEY, PROFILE_EMAIL_KEY, PROFILE_NAME_KEY } from "@/lib/auth";
-import { toast } from "@/components/feedback/Toaster";
+import {
+  AVATAR_KEY,
+  COVER_KEY,
+  PROFILE_EMAIL_KEY,
+  PROFILE_NAME_KEY,
+} from "@/lib/auth";
+import toast from "@/lib/toast";
 
 export default function VenueManagerToggle({ name, isManager, onUpdated }) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const userName = name || localStorage.getItem(PROFILE_NAME_KEY) || "";
 
-  const handleClick = () => {
-    if (saving) return; // ignore clicks while saving (no disabled attr → no opacity)
-    if (!isManager) setConfirmOpen(true); // turning ON → confirm
-    else patch(false);                    // turning OFF → immediate
-  };
+  function confirmToggle() {
+    if (saving) return;
+
+    const turningOn = !isManager;
+
+    toast.confirm({
+      title: turningOn ? "Become a Venue Manager?" : "Disable Venue Manager?",
+      message: turningOn
+        ? "You’ll be able to create and manage venues, and view related bookings."
+        : "You can re-enable it anytime from your profile.",
+      confirmText: turningOn ? "Yes, enable" : "Disable",
+      cancelText: "Cancel",
+      onConfirm: () => patch(turningOn),
+    });
+  }
+
+  function onKeyDown(e) {
+    if (saving) return;
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      confirmToggle();
+    }
+  }
 
   async function patch(nextVal) {
     try {
@@ -37,81 +59,47 @@ export default function VenueManagerToggle({ name, isManager, onUpdated }) {
         _count: p?._count,
       });
 
-      if (nextVal) {
-  toast.success("Venue Manager enabled — you can now create venues");
-} else {
-  // use brand pink for disable as well
-  toast.success("Venue Manager disabled — re-enable anytime");
-}
-
+      toast.success(
+        nextVal
+          ? "Venue Manager enabled — you can now create venues"
+          : "Venue Manager disabled — re-enable anytime"
+      );
     } catch (e) {
       toast.error(e?.message || "Could not update your manager status");
     } finally {
       setSaving(false);
-      setConfirmOpen(false);
     }
   }
 
   return (
-    <>
-      <div className="mt-3 flex items-center gap-2">
-        <span className="text-sm text-ocean">Venue manager</span>
+    <div className="mt-3 flex items-center gap-2">
+      <span className="text-sm text-ocean">Venue manager</span>
 
-        {/* TRACK: brand pink OFF, darker brand pink ON. No opacity changes. */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={isManager}
-          aria-label="Toggle venue manager"
-          aria-disabled={saving}
-          onClick={handleClick}
+      {/* TRACK (div, not button) so global button styles don't interfere) */}
+      <div
+        role="switch"
+        aria-checked={isManager}
+        aria-label="Toggle venue manager"
+        aria-disabled={saving ? "true" : "false"}
+        tabIndex={0}
+        onClick={confirmToggle}
+        onKeyDown={onKeyDown}
+        className={[
+          "relative inline-flex h-6 w-11 items-center rounded-full select-none",
+          "transition-colors duration-200 ease-out",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink/40",
+          isManager ? "bg-pink-700" : "bg-pink-500",
+          saving ? "cursor-wait" : "cursor-pointer",
+        ].join(" ")}
+      >
+        <span
           className={[
-            "relative inline-flex h-6 w-11 items-center rounded-full",
-            "transition-colors duration-200 ease-out",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink/40",
-            isManager ? "bg-pink-700 hover:bg-pink-700" : "bg-pink hover:bg-pink-600",
-            saving ? "cursor-wait" : "cursor-pointer",
+            "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow",
+            "transition-transform duration-200 ease-out",
+            isManager ? "translate-x-5" : "translate-x-1",
           ].join(" ")}
-        >
-          {/* KNOB */}
-          <span
-            className={[
-              "inline-block h-5 w-5 transform rounded-full bg-white shadow",
-              "transition-transform duration-200 ease-out",
-            , isManager ? "translate-x-5" : "translate-x-1"].join(" ")}
-          />
-        </button>
+        />
       </div>
-
-      {/* Confirm dialog when turning ON */}
-      {confirmOpen && (
-        <div
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/50 p-4"
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="w-full max-w-sm rounded-[10px] bg-white p-5 shadow-xl">
-            <h3 className="mb-2 font-semibold text-ocean-700">Become a Venue Manager?</h3>
-            <p className="mb-4 text-sm text-ocean-800">
-              You’ll be able to create and manage venues, and view related bookings.
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                className="btn btn-outline-pink w-full uppercase"
-                onClick={() => setConfirmOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-pink w-full uppercase shadow"
-                onClick={() => patch(true)}
-              >
-                {saving ? "Enabling…" : "Yes, enable"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

@@ -32,3 +32,19 @@ export function getStoredName() {
 export function getStoredEmail() {
   return localStorage.getItem(PROFILE_EMAIL_KEY);
 }
+
+/* ── NEW: clear helpers + one-call sign out ─────────────────────────────────── */
+export function clearProfileBasics() {
+  localStorage.removeItem(PROFILE_NAME_KEY);
+  localStorage.removeItem(PROFILE_EMAIL_KEY);
+  localStorage.removeItem(AVATAR_KEY);
+  localStorage.removeItem(COVER_KEY);
+}
+
+/** Clear token + cached profile and notify app */
+export function clearAuth() {
+  clearAccessToken();
+  clearProfileBasics();
+  // let navbar / guards react if needed
+  window.dispatchEvent(new Event("holidaze:logout"));
+}

@@ -7,11 +7,32 @@ import Venue from "@/routes/Venue.jsx";
 import Profile from "@/routes/Profile.jsx";
 import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
-import RequireAuth from "@/routes/guards/RequireAuth.jsx"; // 👈 add this
+import RequireAuth from "@/routes/guards/RequireAuth.jsx";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Notifications (success/error/info): bottom-right */}
+      <ToastContainer
+        position="bottom-right"
+        theme="light"
+        newestOnTop
+        closeButton={false}
+      />
+
+      {/* Centered confirm toasts (used by toast.confirm) */}
+      <ToastContainer
+        enableMultiContainer
+        containerId="center"
+        position="top-center"
+        theme="light"
+        closeButton={false}
+        className="!fixed !top-1/2 !left-1/2 !-translate-x-1/2 !-translate-y-1/2 !p-0"
+      />
+
       <Routes>
         {/* Home: NO layout */}
         <Route index element={<Home />} />

@@ -1,20 +1,24 @@
+// src/routes/Profile.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import VenueManagerToggle from "@/components/profile/VenueManagerToggle";
 import ProfileMedia from "@/components/profile/ProfileMedia";
 import BookingsPanel from "@/components/profile/BookingsPanel";
 import MyVenuesPanel from "@/components/profile/MyVenuesPanel";
-
+import toast from "@/lib/toast";
 import {
   AVATAR_KEY,
   COVER_KEY,
   PROFILE_NAME_KEY,
   PROFILE_EMAIL_KEY,
+  clearAuth,
 } from "@/lib/auth";
-
 import { getMyProfile } from "@/lib/authApi";
 
 export default function Profile() {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState({
     name: "sunGypsy",
     email: "you@example.com",
@@ -63,6 +67,20 @@ export default function Profile() {
     }
   }, []);
 
+  function handleLogoutClick() {
+    toast.confirm({
+      title: "Logging out?",
+      message: "Hope to see you again soon!",
+      confirmText: "Log out",
+      cancelText: "Stay logged in",
+      onConfirm: () => {
+        clearAuth();
+        toast.miniSuccess("Logged out");
+        navigate("/login");
+      },
+    });
+  }
+
   return (
     <div className="mx-auto w-full max-w-3xl">
       <div className="card-sand p-0 overflow-hidden">
@@ -80,11 +98,21 @@ export default function Profile() {
           />
         </ProfileMedia>
 
-        {/* Content */}
-        <div className="px-6 pb-6 pt-0">
+        {/* Content (keeps logout on the white card) */}
+        <div className="px-6 pb-8 pt-0">
           <div className="mt-8 space-y-6">
             <BookingsPanel />
             <MyVenuesPanel isManager={user.venueManager} />
+          </div>
+
+          <div className="mt-8 text-center">
+            <button
+              type="button"
+              onClick={handleLogoutClick}
+              className="text-ocean underline hover:no-underline"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>

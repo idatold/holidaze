@@ -1,14 +1,16 @@
 @import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Arsenal:wght@400;700&display=swap");
 
-/* Higuen OTF placed at /public/fonts/Higuen.otf */
+/* src/index.css (replace the old @font-face for Higuen) */
 @font-face {
   font-family: "Higuen";
-  src: url("/fonts/Higuen.otf") format("opentype");
+  src: url("/fonts/Higuen.woff2?v=2") format("woff2"),
+       url("/fonts/Higuen.woff?v=2") format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
+
 
 /* base */
 :root, body, #root { height: 100%; }
@@ -139,3 +141,52 @@ body { margin: 0; font-family: "Arsenal", ui-sans-serif, system-ui; }
 
 /* optional */
 .text-shadow { text-shadow: 0 2px 8px rgba(0,0,0,.55), 0 1px 2px rgba(0,0,0,.7); }
+
+
+/* ============================
+   Holidaze Toastify theming
+   ============================ */
+
+/* Global variables for the light theme */
+:root {
+  /* Make success color = brand pink (affects default icon/accents) */
+  --toastify-color-success: #D23393;
+  --toastify-icon-color-success: var(--toastify-color-success);
+  /* Stronger progress color in light theme */
+  --toastify-color-progress-light: #D23393;
+  /* Default text for light theme to true black */
+  --toastify-text-color-light: #111111;
+}
+
+/* Our progress bar (already referenced via progressClassName) */
+.Toastify__progress-bar.toast-progress-pink {
+  background-color: #D23393 !important;   /* bold brand pink */
+}
+
+/* Our branded toast frame */
+.toast-brand.Toastify__toast {
+  color: #111111;                          /* black text */
+  border: 2px solid #D23393;               /* pink border */
+  box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+}
+
+/* Make the success/check icon pink (works across themes) */
+.toast-brand .Toastify__toast-icon svg {
+  fill: #D23393 !important;
+}
+
+/* Kill the green track behind the progress bar completely */
+.toast-brand .Toastify__progress-bar--light {
+  background: #D23393 !important;
+}
+
+/* Toastify progress bar brand color */
+.Toastify__progress-bar.toast-progress-pink {
+  background-color: #D23393 !important; /* brand pink */
+}
+
+.toast-mini.Toastify__toast {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-width: 2px; /* matches other toasts */
+}

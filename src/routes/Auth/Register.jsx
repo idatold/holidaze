@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "@/lib/authApi";
+import toast from "@/lib/toast";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -17,20 +18,27 @@ export default function Register() {
 
     // quick client-side checks to match docs
     if (!email.endsWith("@stud.noroff.no")) {
-      setErr("Use your @stud.noroff.no email.");
+      const m = "Use your @stud.noroff.no email.";
+      setErr(m);
+      toast.error(m);
       return;
     }
     if (password.length < 8) {
-      setErr("Password must be at least 8 characters.");
+      const m = "Password must be at least 8 characters.";
+      setErr(m);
+      toast.error(m);
       return;
     }
 
     setLoading(true);
     try {
       await registerUser({ name, email, password, venueManager });
-      navigate("/login"); // success → go log in
+      toast.miniSuccess("Account created — please log in");
+      navigate("/login");
     } catch (e) {
-      setErr(e?.response?.data?.message || e.message || "Registration failed");
+      const m = e?.response?.data?.message || e.message || "Registration failed";
+      setErr(m);
+      toast.error(m);
     } finally {
       setLoading(false);
     }
@@ -81,7 +89,7 @@ export default function Register() {
             />
           </div>
 
-          {/* Venue manager toggle stays the same */}
+          {/* Venue manager toggle */}
           <div className="pt-1">
             <span className="block mb-1 text-sm text-ocean">Venue manager</span>
             <button
@@ -89,17 +97,21 @@ export default function Register() {
               role="switch"
               aria-checked={venueManager}
               aria-label="Venue manager"
-              onClick={() => setVenueManager(v => !v)}
+              onClick={() => setVenueManager((v) => !v)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition
                 ${venueManager ? "bg-ocean-deep" : "bg-ocean"}`}
             >
-              <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition
-                ${venueManager ? "translate-x-5" : "translate-x-1"}`} />
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition
+                ${venueManager ? "translate-x-5" : "translate-x-1"}`}
+              />
             </button>
           </div>
 
           {err && (
-            <p className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700">{err}</p>
+            <p className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700" aria-live="polite">
+              {err}
+            </p>
           )}
 
           <button type="submit" className="btn btn-ocean w-full" disabled={loading}>
@@ -109,7 +121,9 @@ export default function Register() {
 
         <p className="mt-3 text-center text-sm text-ocean">
           Already have an account?{" "}
-          <Link to="/login" className="underline text-ocean">Login here!</Link>
+          <Link to="/login" className="underline text-ocean">
+            Login here!
+          </Link>
         </p>
       </div>
     </div>
