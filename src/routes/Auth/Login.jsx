@@ -1,7 +1,8 @@
+// src/routes/Auth/Login.jsx
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "@/lib/authApi";
-import { storeAccessToken, storeProfileBasics } from "@/lib/auth";
+import { storeAccessToken, storeProfileBasics, emitAuthChange } from "@/lib/auth";
 import toast from "@/lib/toast";
 
 export default function Login() {
@@ -29,6 +30,9 @@ export default function Login() {
         avatarUrl: user.avatar?.url ?? null,
         coverUrl: user.banner?.url ?? null,
       });
+
+      // 3) notify app: flip navbar instantly (same-tab)
+      emitAuthChange();
 
       toast.miniSuccess(`Welcome, ${user.name}`);
       navigate("/profile");
@@ -77,7 +81,10 @@ export default function Login() {
           </div>
 
           {err && (
-            <p className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700" aria-live="polite">
+            <p
+              className="rounded-[5px] bg-red-50 px-3 py-2 text-sm text-red-700"
+              aria-live="polite"
+            >
               {err}
             </p>
           )}

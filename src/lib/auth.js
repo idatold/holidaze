@@ -7,6 +7,14 @@ export const PROFILE_EMAIL_KEY = "profile_email";
 export const AVATAR_KEY = "holidaze_avatar_url";
 export const COVER_KEY  = "holidaze_cover_url";
 
+// ── App-wide auth change event ────────────────────────────────────────────────
+export const AUTH_CHANGED_EVENT = "auth:changed";
+export function emitAuthChange() {
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+  // (legacy compat if anything else listened for it)
+  window.dispatchEvent(new Event("holidaze:logout"));
+}
+
 // ── Token helpers ─────────────────────────────────────────────────────────────
 export function storeAccessToken(token) {
   localStorage.setItem(TOKEN_KEY, token);
@@ -33,7 +41,6 @@ export function getStoredEmail() {
   return localStorage.getItem(PROFILE_EMAIL_KEY);
 }
 
-/* ── NEW: clear helpers + one-call sign out ─────────────────────────────────── */
 export function clearProfileBasics() {
   localStorage.removeItem(PROFILE_NAME_KEY);
   localStorage.removeItem(PROFILE_EMAIL_KEY);
@@ -41,10 +48,9 @@ export function clearProfileBasics() {
   localStorage.removeItem(COVER_KEY);
 }
 
-/** Clear token + cached profile and notify app */
+/** Clear token + cached profile and notify app (Navbar listens) */
 export function clearAuth() {
   clearAccessToken();
   clearProfileBasics();
-  // let navbar / guards react if needed
-  window.dispatchEvent(new Event("holidaze:logout"));
+  emitAuthChange();
 }
