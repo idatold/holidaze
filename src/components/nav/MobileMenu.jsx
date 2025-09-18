@@ -12,7 +12,7 @@ import {
 
 export default function MobileMenu({ isLoggedIn, onClose }) {
   const navigate = useNavigate();
-  const firstRender = useRef(true);
+  const closeBtnRef = useRef(null);
 
   const name = localStorage.getItem(PROFILE_NAME_KEY) || "";
   const email = localStorage.getItem(PROFILE_EMAIL_KEY) || "";
@@ -27,6 +27,11 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
     };
   }, []);
 
+  // Focus the close button on open (keyboard-friendly)
+  useEffect(() => {
+    closeBtnRef.current?.focus();
+  }, []);
+
   // Close on ESC
   useEffect(() => {
     function onKey(e) {
@@ -35,9 +40,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
-
-  // NOTE: Removed "close on route change" effect to avoid instant close on open.
-  // If you want it later, we can re-add with a safe guard.
 
   function goto(path) {
     navigate(path);
@@ -63,22 +65,24 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
+      onMouseDown={onClose} // backdrop closes on mousedown
     >
       {/* Dim background */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Slide-down full-width panel */}
+      {/* Panel */}
       <div
+        id="mobile-menu"
         className="absolute inset-x-0 top-0 origin-top animate-[mobileSheet_.16s_ease-out] rounded-b-[5px] bg-[#FAF6F4] p-4 shadow-md"
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()} // don't pass click through
       >
-        {/* Top row */}
+        {/* Header row */}
         <div className="flex items-end justify-between">
           <Link to="/" onClick={() => goto("/")} className="flex items-end gap-2">
             <img src={logo} alt="Holidaze" className="h-[40px] w-auto" />
           </Link>
           <button
+            ref={closeBtnRef}
             type="button"
             aria-label="Close menu"
             onClick={onClose}
@@ -107,7 +111,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-[#79BAEC] text-white grid place-items-center ring-1 ring-black/5">
-                  <span className="text-sm font-bold">{name.slice(0,2).toUpperCase()}</span>
+                  <span className="text-sm font-bold">{name.slice(0, 2).toUpperCase()}</span>
                 </div>
               )}
               <div>
@@ -118,7 +122,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
           </button>
         )}
 
-        {/* Nav links */}
+        {/* Links */}
         <nav className="mt-3">
           <button
             onClick={() => goto("/")}
@@ -137,7 +141,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
 
           {isLoggedIn ? (
             <>
-              {/* Same links as desktop dropdown */}
               <button
                 onClick={() => goto("/profile")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
@@ -182,7 +185,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
         </nav>
       </div>
 
-      {/* keyframes for the animation */}
+      {/* tiny keyframes for the animation */}
       <style>{`
         @keyframes mobileSheet {
           from { transform: translateY(-8px); opacity: .0; }

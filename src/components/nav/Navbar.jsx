@@ -17,7 +17,7 @@ export default function Navbar() {
     };
     check();
 
-    window.addEventListener("storage", check);          // cross-tab
+    window.addEventListener("storage", check); // cross-tab
     window.addEventListener(AUTH_CHANGED_EVENT, check); // same-tab
     return () => {
       window.removeEventListener("storage", check);
@@ -35,14 +35,22 @@ export default function Navbar() {
 
         {/* Desktop (≥sm) */}
         <div className="hidden sm:flex items-center gap-5">
-          <NavLink to="/" className="nav-link">Home</NavLink>
-          <NavLink to="/venues" className="nav-link">Venues</NavLink>
+          <NavLink to="/" className="nav-link">
+            Home
+          </NavLink>
+          <NavLink to="/venues" className="nav-link">
+            Venues
+          </NavLink>
           {isLoggedIn ? (
             <UserMenu />
           ) : (
             <>
-              <NavLink to="/login" className="nav-link">Log in</NavLink>
-              <NavLink to="/register" className="nav-link">Register</NavLink>
+              <NavLink to="/login" className="nav-link">
+                Log in
+              </NavLink>
+              <NavLink to="/register" className="nav-link">
+                Register
+              </NavLink>
             </>
           )}
         </div>
@@ -52,9 +60,17 @@ export default function Navbar() {
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
+          aria-expanded={mobileOpen} // ← add
+          aria-controls="mobile-menu" // ← add
           className="sm:hidden self-end rounded-[5px] p-2 hover:shadow-sm active:scale-[0.98] focus:outline-none -mb-[2px]"
         >
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="#006492" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="#006492"
+            aria-hidden="true"
+          >
             <rect x="3" y="5" width="18" height="2" rx="1" />
             <rect x="3" y="11" width="18" height="2" rx="1" />
             <rect x="3" y="17" width="18" height="2" rx="1" />

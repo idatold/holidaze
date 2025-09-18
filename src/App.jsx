@@ -8,6 +8,7 @@ import Profile from "@/routes/Profile.jsx";
 import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
 import RequireAuth from "@/routes/guards/RequireAuth.jsx";
+import NotFound from "@/routes/Auth/NotFound.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -55,6 +56,11 @@ export default function App() {
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
+        </Route>
+
+        {/* 404 fallback (keeps navbar/footer via DefaultLayout) */}
+        <Route element={<DefaultLayout />}>
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
