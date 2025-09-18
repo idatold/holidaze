@@ -9,6 +9,9 @@ export default function Navbar() {
           <img src={logo} alt="Holidaze" className="w-[150px] h-[63px]" />
         </Link>
         <div className="flex items-center gap-5">
+            <NavLink to="/" className="nav-link">
+           Home
+          </NavLink>
           <NavLink to="/venues" className="nav-link">
             Venues
           </NavLink>

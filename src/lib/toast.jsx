@@ -5,14 +5,14 @@ import { toast as rt, Zoom } from "react-toastify";
 const baseOpts = {
   theme: "light",
   pauseOnHover: true,
-  transition: Zoom,   // smoother than slide/bounce
-  autoClose: 3200,    // a bit longer so it doesn’t feel abrupt
-  draggable: false,   // avoid zippy drag “snap back”
+  transition: Zoom,   
+  autoClose: 3200,    
+  draggable: false,   
 };
 
 /* ─────────────────────────  Shared classes  ───────────────────────── */
 const bodyClass = "font-arsenal text-ink";
-/* no generic `border` here (prevents default gray/black) */
+
 const boxClass  = "rounded-[12px] bg-white shadow-lg " + bodyClass;
 
 /* explicit brand frame (tailwind-only) */
