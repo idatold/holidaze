@@ -17,10 +17,11 @@ export default function Login() {
     setErr("");
     setLoading(true);
     try {
-      const user = await loginUser({ email, password });
+      const payload = { email: email.trim().toLowerCase(), password };
+      const user = await loginUser(payload);
       if (!user?.accessToken) throw new Error("No access token returned.");
 
-      // 1) token for axios
+      // 1) token for axios/fetch
       storeAccessToken(user.accessToken);
 
       // 2) cache basics for Profile/Navbar
@@ -37,7 +38,12 @@ export default function Login() {
       toast.miniSuccess(`Welcome, ${user.name}`);
       navigate("/profile");
     } catch (e) {
-      const m = e?.response?.data?.message || e.message || "Login failed";
+      // Prefer Noroff v2 error shape -> errors[0].message
+      const m =
+        e?.response?.data?.errors?.[0]?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Login failed";
       setErr(m);
       toast.error(m);
     } finally {
