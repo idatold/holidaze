@@ -40,7 +40,7 @@ export default function VenuesHero({
         {/* Content overlay */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white gap-4 px-4">
           <h1 className="text-3xl sm:text-4xl font-bold drop-shadow">Venues</h1>
-          <p className="opacity-95">Find venues posted by our community</p>
+          <p className="font-bold">Find venues posted by our community</p>
 
           {/* Form: Arsenal font, 5px radius, brand pink inputs, no rings */}
           <form

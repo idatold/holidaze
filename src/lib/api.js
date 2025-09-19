@@ -1,16 +1,20 @@
 import axios from "axios";
 
-// Read either name, fall back to localhost
-export const API_BASE =
+// ✅ Default to Noroff v2 unless overridden in .env
+export const API_BASE = (
   import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_API_BASE ||
-  "http://localhost:3000";
+  "https://v2.api.noroff.dev"
+).replace(/\/$/, ""); // drop trailing slash to avoid '//' joins
 
 const NOROFF_API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
 
 export const api = axios.create({
   baseURL: API_BASE,
-  headers: { "Content-Type": "application/json" },
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 });
 
 // Attach token + (optional) Noroff API key on every request
@@ -34,7 +38,7 @@ const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
  * Always starts with a leading slash so axios joins correctly.
  */
 function hPath(path) {
-  return `${HOLIDAZE_PREFIX}${path}`; // e.g. "/holidaze/venues"
+  return `${HOLIDAZE_PREFIX}${path}`; 
 }
 
 /**
