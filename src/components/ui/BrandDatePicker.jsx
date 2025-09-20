@@ -9,7 +9,8 @@ const PinkInput = forwardRef(function PinkInput(
   ref
 ) {
   return (
-    <div className="relative">
+    // make the container full width so absolute icon aligns correctly
+    <div className="relative w-full">
       <input
         ref={ref}
         value={value || ""}
@@ -44,7 +45,8 @@ export default function BrandDatePicker({
   const id = useId();
 
   return (
-    <div className={`inline-block ${className}`}>
+    // was: inline-block —> block w-full on mobile, auto on sm+
+    <div className={`block w-full sm:w-auto ${className}`}>
       {label && (
         <label htmlFor={id} className="sr-only font-arsenal">
           {label}
@@ -57,8 +59,10 @@ export default function BrandDatePicker({
         onChange={onChange}
         dateFormat="dd/MM/yyyy"
         placeholderText={placeholder}
+        /* makes react-datepicker's outer wrapper stretch too */
+        wrapperClassName="w-full"
         /* Use our custom input so styles & icon are consistent */
-        customInput={<PinkInput />}
+        customInput={<PinkInput className="w-full" />}
         calendarClassName="hz-datepicker"   /* white card, pink ring, 5px */
         popperClassName="hz-popper"
         popperPlacement="bottom-start"
