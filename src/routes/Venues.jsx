@@ -1,3 +1,4 @@
+// src/routes/Venues.jsx
 import { useState } from "react";
 import VenuesHero from "@/components/venues/VenuesHero.jsx";
 import VenuesGrid from "@/components/venues/VenuesGrid.jsx";
@@ -22,8 +23,13 @@ export default function Venues() {
     <div className="supports-[overflow:clip]:overflow-x-clip overflow-x-hidden">
       <VenuesHero q={q} onQChange={setQ} onSubmit={onSubmit} fullBleed />
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10">
-        {/* pass the dates down; we'll use them in the next step */}
-        <VenuesGrid q={submitted} dateFrom={range.dateFrom} dateTo={range.dateTo} />
+        {/* dates are consumed by VenuesGrid for availability filtering */}
+        <VenuesGrid
+          key={`${submitted}|${range.dateFrom ?? ""}|${range.dateTo ?? ""}`}
+          q={submitted}
+          dateFrom={range.dateFrom}
+          dateTo={range.dateTo}
+        />
       </main>
     </div>
   );
