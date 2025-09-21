@@ -5,7 +5,7 @@ import Register from "@/routes/Auth/Register.jsx";
 import Venues from "@/routes/Venues.jsx";
 import Venue from "@/routes/Venue.jsx";
 import Profile from "@/routes/Profile.jsx";
-import MyBookings from "@/routes/MyBookings.jsx"; // ← added
+import MyBookings from "@/routes/MyBookings.jsx"; 
 import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
 import RequireAuth from "@/routes/guards/RequireAuth.jsx";
