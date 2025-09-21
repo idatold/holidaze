@@ -25,10 +25,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-/* ─────────────────────────────  Holidaze Venues API  ─────────────────────────────
-   IMPORTANT: Keep API_BASE pointing to the root (e.g. https://v2.api.noroff.dev),
-   not including `/holidaze`. We’ll add that segment in the path helpers below.
-------------------------------------------------------------------------------- */
+
 
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";

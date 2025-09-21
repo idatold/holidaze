@@ -5,6 +5,7 @@ import Register from "@/routes/Auth/Register.jsx";
 import Venues from "@/routes/Venues.jsx";
 import Venue from "@/routes/Venue.jsx";
 import Profile from "@/routes/Profile.jsx";
+import MyBookings from "@/routes/MyBookings.jsx"; // ← added
 import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
 import RequireAuth from "@/routes/guards/RequireAuth.jsx";
@@ -50,13 +51,22 @@ export default function App() {
               </RequireAuth>
             }
           />
+          {/* 👇 New protected route */}
+          <Route
+            path="account/bookings"
+            element={
+              <RequireAuth>
+                <MyBookings />
+              </RequireAuth>
+            }
+          />
         </Route>
 
         {/* Full-bleed pages */}
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
-          {/* ✅ added so VenueCard links like `/venue/123` also work */}
+          {/* ✅ keep compatibility with /venue/:id links */}
           <Route path="venue/:id" element={<Venue />} />
         </Route>
 

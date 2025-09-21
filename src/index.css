@@ -278,3 +278,43 @@ body { margin: 0; font-family: "Arsenal", ui-sans-serif, system-ui; }
 .hz-datepicker h2 {
   font-family: "Arsenal", ui-sans-serif, system-ui;
 }
+
+/* ===== Booking Calendar (Booked vs Free) — no !important ===== */
+
+/* Booked days: pink hatch, disabled look */
+.hz-datepicker .react-datepicker__month .react-datepicker__week .react-datepicker__day.hz-day-booked {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(210, 51, 147, 0.12) 0 6px,
+    rgba(210, 51, 147, 0.18) 6px 12px
+  );
+  color: #6b7280;             /* grey text */
+  cursor: not-allowed;
+  pointer-events: none;
+  border-radius: 5px;
+}
+
+/* Keep hover from altering booked appearance */
+.hz-datepicker .react-datepicker__month .react-datepicker__week .react-datepicker__day.hz-day-booked:hover {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(210, 51, 147, 0.12) 0 6px,
+    rgba(210, 51, 147, 0.18) 6px 12px
+  );
+}
+
+/* So the booked interval has nice rounded ends */
+.hz-datepicker .react-datepicker__day.hz-day-booked.hz-day-booked-edge-start {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+.hz-datepicker .react-datepicker__day.hz-day-booked.hz-day-booked-edge-end {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+/* Optional: past-but-not-booked look subtly disabled */
+.hz-datepicker .react-datepicker__day--disabled:not(.hz-day-booked) {
+  color: #9ca3af;
+  opacity: 0.7;
+}
