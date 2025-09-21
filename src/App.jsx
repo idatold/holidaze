@@ -56,6 +56,8 @@ export default function App() {
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
+          {/* ✅ added so VenueCard links like `/venue/123` also work */}
+          <Route path="venue/:id" element={<Venue />} />
         </Route>
 
         {/* 404 fallback (keeps navbar/footer via DefaultLayout) */}
