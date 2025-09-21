@@ -1,9 +1,13 @@
-// src/routes/MyBookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
 import { getStoredName, getAccessToken } from "@/lib/auth";
 import toast from "@/lib/toast";
+import { deleteBooking } from "@/lib/bookings";
+
+import BookingsSection from "@/components/bookings/BookingsSection.jsx";
+import BookingRow from "@/components/bookings/BookingRow.jsx";
+import SortSelect from "@/components/bookings/SortSelect.jsx";
 
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
@@ -15,8 +19,14 @@ export default function MyBookings() {
   const name = getStoredName();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState({}); // { [bookingId]: true }
+
+  // sorting state
+  const [activeSort, setActiveSort] = useState("startAsc");
+  const [pastSort, setPastSort] = useState("endDesc");
 
   const greeting = useMemo(() => (name ? `Hi, ${name}!` : "My bookings"), [name]);
+  const today = useMemo(() => startOfDay(new Date()), []);
 
   useEffect(() => {
     if (!authed || !name) {
@@ -28,10 +38,9 @@ export default function MyBookings() {
     (async () => {
       try {
         setLoading(true);
-        // GET /holidaze/profiles/:name/bookings?_venue=true
         const { data } = await api.get(
           h(`/profiles/${encodeURIComponent(name)}/bookings`),
-          { params: { _venue: true, sort: "dateFrom", sortOrder: "desc", limit: 50 } }
+          { params: { _venue: true, sort: "dateFrom", sortOrder: "desc", limit: 100 } }
         );
         if (!alive) return;
         setRows(Array.isArray(data?.data) ? data.data : []);
@@ -44,66 +53,122 @@ export default function MyBookings() {
     return () => { alive = false; };
   }, [authed, name, nav]);
 
+  // Split into Active (not expired) vs Past (expired)
+  const { active, past } = useMemo(() => {
+    const a = [], p = [];
+    for (const b of rows) {
+      const to = safeDate(b?.dateTo);
+      if (!to) continue;
+      (startOfDay(to) < today ? p : a).push(b);
+    }
+    return { active: a, past: p };
+  }, [rows, today]);
+
+  const sortedActive = useMemo(() => sortBookings(active, activeSort), [active, activeSort]);
+  const sortedPast = useMemo(() => sortBookings(past, pastSort), [past, pastSort]);
+
+  async function onCancel(bookingId) {
+    toast.confirm({
+      title: "Cancel this booking?",
+      message: "This cannot be undone.",
+      confirmText: "Cancel booking",
+      cancelText: "Keep booking",
+      onConfirm: async () => {
+        try {
+          setDeleting((m) => ({ ...m, [bookingId]: true }));
+          await deleteBooking(bookingId);
+          setRows((prev) => prev.filter((b) => b.id !== bookingId));
+          toast.miniSuccess("Booking canceled.");
+        } catch (e) {
+          toast.error(e?.message || "Could not cancel booking.");
+        } finally {
+          setDeleting((m) => {
+            const n = { ...m };
+            delete n[bookingId];
+            return n;
+          });
+        }
+      },
+    });
+  }
+
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="font-higuen text-ocean text-3xl font-bold">{greeting}</h1>
-      <p className="text-zinc-600 mt-1">Here are the trips you’ve booked.</p>
+      <h1 className="font-higuen text-white text-3xl font-bold">{greeting}</h1>
+      <p className="mt-1 text-white/90 font-semibold">Here are the trips you’ve booked.</p>
 
-      {loading ? (
+      {/* Loading skeleton */}
+      {loading && (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-[8px] bg-zinc-100 animate-pulse" />
+            <div key={i} className="h-24 rounded-2xl bg-white/40 animate-pulse" />
           ))}
         </div>
-      ) : rows.length === 0 ? (
-        <div className="mt-6 rounded-[8px] border border-zinc-200 bg-white p-6">
-          <p className="text-zinc-700">No bookings yet.</p>
+      )}
+
+      {/* Show this only when there are literally no bookings at all */}
+      {!loading && active.length === 0 && past.length === 0 && (
+        <div className="mt-6 rounded-2xl bg-white shadow-md ring-1 ring-black/5 p-6">
+          <p className="text-ink">No bookings yet.</p>
           <Link to="/venues" className="btn btn-pink mt-4 inline-flex">Find a place</Link>
         </div>
-      ) : (
-        <ul className="mt-6 grid gap-4">
-          {rows.map((b) => {
-            const v = b?.venue;
-            const img = v?.media?.[0]?.url;
-            const title = v?.name || "Venue";
-            const from = safeDate(b?.dateFrom);
-            const to = safeDate(b?.dateTo);
-            return (
-              <li key={b.id} className="rounded-[8px] border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm">
-                <div className="flex items-center gap-4">
-                  <Link to={`/venue/${v?.id || ""}`} className="shrink-0">
-                    <div className="h-20 w-28 rounded-[6px] overflow-hidden bg-zinc-100">
-                      {img ? (
-                        <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      ) : null}
-                    </div>
-                  </Link>
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/venue/${v?.id || ""}`} className="block font-arsenal text-lg font-bold text-ink truncate">
-                      {title}
-                    </Link>
-                    <div className="mt-1 text-sm text-zinc-600">
-                      {from && to ? (
-                        <>
-                          {fmt(from)} → {fmt(to)} • {nights(from, to)} night{nights(from, to) !== 1 ? "s" : ""} • {b?.guests} guest{b?.guests !== 1 ? "s" : ""}
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </div>
-                  </div>
-                  <Link to={`/venue/${v?.id || ""}`} className="btn btn-pink">View</Link>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+      )}
+
+      {/* Active trips — only if present */}
+      {!loading && sortedActive.length > 0 && (
+        <BookingsSection
+          id="active-trips"
+          title="Active trips"
+          count={sortedActive.length}
+          items={sortedActive}
+          hiddenWhenEmpty
+          actions={<SortSelect value={activeSort} onChange={setActiveSort} />}
+        >
+          {sortedActive.map((b) => (
+            <BookingRow
+              key={b.id}
+              booking={b}
+              onCancel={onCancel}
+              deleting={!!deleting[b.id]}
+            />
+          ))}
+        </BookingsSection>
+      )}
+
+      {/* Past trips — ALWAYS show (even empty), with empty text and sorting */}
+      {!loading && (
+        <BookingsSection
+          id="past-trips"
+          title="Past trips"
+          count={sortedPast.length}
+          items={sortedPast}
+          hiddenWhenEmpty={false}
+          emptyText="No past trips yet."
+          actions={<SortSelect value={pastSort} onChange={setPastSort} />}
+        >
+          {sortedPast.map((b) => (
+            <BookingRow key={b.id} booking={b} faded cta="Book again" />
+          ))}
+        </BookingsSection>
       )}
     </main>
   );
 }
 
+/* ─────────────── local utils ─────────────── */
 function safeDate(v) { const d = new Date(v); return isNaN(d) ? null : d; }
-function fmt(d) { return new Intl.DateTimeFormat("en-GB",{ day:"2-digit", month:"short", year:"numeric" }).format(d); }
-function nights(a,b){ const ms = startOfDay(b) - startOfDay(a); return Math.max(1, Math.round(ms/86400000)); }
-function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function sortBookings(list, mode) {
+  const arr = [...list];
+  const get = (b, k) => {
+    const d = k === "start" ? new Date(b.dateFrom) : new Date(b.dateTo);
+    return d.getTime();
+  };
+  switch (mode) {
+    case "startAsc":  return arr.sort((a, b) => get(a, "start") - get(b, "start"));
+    case "startDesc": return arr.sort((a, b) => get(b, "start") - get(a, "start"));
+    case "endAsc":    return arr.sort((a, b) => get(a, "end") - get(b, "end"));
+    case "endDesc":   return arr.sort((a, b) => get(b, "end") - get(a, "end"));
+    default:          return arr;
+  }
+}

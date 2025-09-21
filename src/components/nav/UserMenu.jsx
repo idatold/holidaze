@@ -113,7 +113,9 @@ export default function UserMenu() {
           {name}
         </span>
         <svg
-          className={`h-4 w-4 text-[#006492] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 text-[#006492] transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -149,13 +151,16 @@ export default function UserMenu() {
           >
             My profile
           </Link>
+
+          {/* 🔁 updated to new route */}
           <Link
-            to="/profile#bookings"
+            to="/bookings"
             role="menuitem"
             className="block rounded px-3 py-2 text-sm text-[#006492] hover:bg-gray-50"
           >
             My bookings
           </Link>
+
           <Link
             to="/profile#venues"
             role="menuitem"
@@ -163,6 +168,7 @@ export default function UserMenu() {
           >
             My venues
           </Link>
+
           <button
             onClick={handleLogout}
             role="menuitem"

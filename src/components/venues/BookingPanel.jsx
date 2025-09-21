@@ -1,4 +1,3 @@
-// src/components/venues/BookingPanel.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "@/lib/toast";
@@ -40,8 +39,8 @@ export default function BookingPanel({ venueId, maxGuests = 1, bookings = [], on
       });
       toast.success("Booking confirmed!");
       setRange([null, null]);
-      // 👉 go to My bookings
-      navigate("/account/bookings");
+      // 👉 go to My bookings (new route)
+      navigate("/bookings");
     } catch (err) {
       toast.error(err?.message || "Could not complete booking.");
     } finally {
