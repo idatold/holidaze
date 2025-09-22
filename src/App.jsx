@@ -10,6 +10,7 @@ import DefaultLayout from "@/layouts/DefaultLayout.jsx";
 import PlainLayout from "@/layouts/PlainLayout.jsx";
 import RequireAuth from "@/routes/guards/RequireAuth.jsx";
 import NotFound from "@/routes/Auth/NotFound.jsx";
+import MyVenues from "@/routes/MyVenues";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -57,6 +58,15 @@ export default function App() {
             element={
               <RequireAuth>
                 <MyBookings />
+              </RequireAuth>
+            }
+          />
+          {/* ✅ Protected my-venues route */}
+          <Route
+            path="my-venues"
+            element={
+              <RequireAuth>
+                <MyVenues />
               </RequireAuth>
             }
           />

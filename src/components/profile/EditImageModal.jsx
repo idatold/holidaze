@@ -65,7 +65,7 @@ export default function EditImageModal({
     <div
       className={[
         "relative aspect-[16/6] w-full overflow-hidden rounded shadow-sm",
-        isHttp(url) ? "bg-white" : "bg-ocean",       // ← ocean when empty
+        isHttp(url) ? "bg-white" : "bg-ocean", 
       ].join(" ")}
     >
       {isHttp(url) ? (
@@ -88,7 +88,7 @@ export default function EditImageModal({
       open={open}
       onClose={onClose}
       title={mode === "avatar" ? "Edit profile picture" : "Edit header photo"}
-      className="ring-2 ring-pink-500"   // brand pink modal frame
+      className="ring-2 ring-pink-500"   
     >
       <div className="space-y-4">
         {mode === "avatar" ? avatarPreview : coverPreview}
