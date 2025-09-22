@@ -1,5 +1,4 @@
-// src/routes/Profile.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import VenueManagerToggle from "@/components/profile/VenueManagerToggle";
@@ -16,55 +15,47 @@ import {
 } from "@/lib/auth";
 import { getMyProfile } from "@/lib/authApi";
 
+// Synchronous localStorage read so first render gets the real values
+const LS_NAME = typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_NAME_KEY) : "";
+const LS_EMAIL = typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_EMAIL_KEY) : "";
+const LS_AVATAR = typeof localStorage !== "undefined" ? localStorage.getItem(AVATAR_KEY) : "";
+const LS_COVER = typeof localStorage !== "undefined" ? localStorage.getItem(COVER_KEY) : "";
+
 export default function Profile() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState({
-    name: "sunGypsy",
-    email: "you@example.com",
+    name: LS_NAME || "sunGypsy",
+    email: LS_EMAIL || "you@example.com",
     venueManager: true,
-    avatarUrl: "",
-    coverUrl: "",
+    avatarUrl: LS_AVATAR || "",
+    coverUrl: LS_COVER || "",
     bio: "",
     created: undefined,
     _count: { venues: 0, bookings: 0 },
   });
 
   useEffect(() => {
-    // 1) hydrate from localStorage
-    const name = localStorage.getItem(PROFILE_NAME_KEY);
-    const email = localStorage.getItem(PROFILE_EMAIL_KEY);
-    const avatarUrl = localStorage.getItem(AVATAR_KEY);
-    const coverUrl = localStorage.getItem(COVER_KEY);
+    const name = LS_NAME;
+    if (!name) return;
 
-    setUser((u) => ({
-      ...u,
-      name: name || u.name,
-      email: email || u.email,
-      avatarUrl: avatarUrl || u.avatarUrl,
-      coverUrl: coverUrl || u.coverUrl,
-    }));
-
-    // 2) fetch fresh from API
-    if (name) {
-      getMyProfile(name, { bookings: true, venues: true })
-        .then((p) => {
-          setUser((u) => ({
-            ...u,
-            name: p?.name || u.name,
-            email: p?.email || u.email,
-            venueManager: Boolean(p?.venueManager),
-            avatarUrl: p?.avatar?.url || u.avatarUrl,
-            coverUrl: p?.banner?.url || u.coverUrl,
-            bio: p?.bio ?? u.bio,
-            created: p?.created ?? u.created,
-            _count: p?._count ?? u._count,
-          }));
-          if (p?.avatar?.url) localStorage.setItem(AVATAR_KEY, p.avatar.url);
-          if (p?.banner?.url) localStorage.setItem(COVER_KEY, p.banner.url);
-        })
-        .catch(() => {});
-    }
+    getMyProfile(name, { bookings: true, venues: true })
+      .then((p) => {
+        setUser((u) => ({
+          ...u,
+          name: p?.name || u.name,
+          email: p?.email || u.email,
+          venueManager: Boolean(p?.venueManager),
+          avatarUrl: p?.avatar?.url || u.avatarUrl,
+          coverUrl: p?.banner?.url || u.coverUrl,
+          bio: p?.bio ?? u.bio,
+          created: p?.created ?? u.created,
+          _count: p?._count ?? u._count,
+        }));
+        if (p?.avatar?.url) localStorage.setItem(AVATAR_KEY, p.avatar.url);
+        if (p?.banner?.url) localStorage.setItem(COVER_KEY, p.banner.url);
+      })
+      .catch(() => {});
   }, []);
 
   function handleLogoutClick() {
@@ -101,7 +92,8 @@ export default function Profile() {
         {/* Content (keeps logout on the white card) */}
         <div className="px-6 pb-8 pt-0">
           <div className="mt-8 space-y-6">
-            <BookingsPanel />
+            {/* Pass the resolved name; panel is resilient anyway */}
+            <BookingsPanel profileName={user.name} />
             <MyVenuesPanel isManager={user.venueManager} />
           </div>
 

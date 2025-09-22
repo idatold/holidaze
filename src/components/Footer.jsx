@@ -5,7 +5,6 @@ export default function Footer() {
   return (
     <footer className="mt-12 bg-[#006492] text-white">
       <div className="container mx-auto px-4 pt-10 pb-4 text-center">
-
         {/* Logo */}
         <img
           src={logo}
@@ -24,9 +23,7 @@ export default function Footer() {
           >
             Venues
           </Link>
-          <Link to="/about" className="text-base font-semibold hover:underline">
-            About
-          </Link>
+
           <Link to="/login" className="text-base font-semibold hover:underline">
             Login
           </Link>
