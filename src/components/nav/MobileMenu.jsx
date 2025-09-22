@@ -1,4 +1,3 @@
-// src/components/nav/MobileMenu.jsx
 import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/holidazebluelogo.svg";
@@ -98,6 +97,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
         {/* User block (avatar + name/email) */}
         {isLoggedIn && (
           <button
+            type="button"
             onClick={() => goto("/profile")}
             className="mt-3 w-full rounded-[5px] bg-white px-3 py-2 text-left shadow ring-1 ring-black/5 hover:shadow-md active:scale-[0.99] transition"
           >
@@ -125,12 +125,14 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
         {/* Links */}
         <nav className="mt-3">
           <button
+            type="button"
             onClick={() => goto("/")}
             className="block w-full text-left px-1 py-2 nav-link !no-underline"
           >
             Home
           </button>
           <button
+            type="button"
             onClick={() => goto("/venues")}
             className="block w-full text-left px-1 py-2 nav-link !no-underline"
           >
@@ -142,24 +144,31 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
           {isLoggedIn ? (
             <>
               <button
+                type="button"
                 onClick={() => goto("/profile")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
               >
                 My profile
               </button>
               <button
-                onClick={() => goto("/profile#bookings")}
+                type="button"
+                onClick={() => goto("/bookings")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
               >
                 My bookings
               </button>
+
+              {/* ✅ Just navigate to /my-venues — no query params */}
               <button
-                onClick={() => goto("/profile#venues")}
+                type="button"
+                onClick={() => goto("/my-venues")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
               >
                 My venues
               </button>
+
               <button
+                type="button"
                 onClick={handleLogout}
                 className="mt-1 block w-full text-left rounded px-2 py-2 text-sm text-[#D23393] hover:bg-white"
               >
@@ -169,12 +178,14 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
           ) : (
             <>
               <button
+                type="button"
                 onClick={() => goto("/login")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
               >
                 Log in
               </button>
               <button
+                type="button"
                 onClick={() => goto("/register")}
                 className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
               >

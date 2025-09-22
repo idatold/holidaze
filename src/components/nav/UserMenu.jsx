@@ -1,4 +1,3 @@
-// src/components/nav/UserMenu.jsx
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "@/lib/toast";
@@ -152,7 +151,7 @@ export default function UserMenu() {
             My profile
           </Link>
 
-          {/* 🔁 updated to new route */}
+          {/* 🔁 bookings already on /bookings */}
           <Link
             to="/bookings"
             role="menuitem"
@@ -161,8 +160,9 @@ export default function UserMenu() {
             My bookings
           </Link>
 
+          {/* ✅ updated: go straight to /my-venues (no hash, no query) */}
           <Link
-            to="/profile#venues"
+            to="/my-venues"
             role="menuitem"
             className="block rounded px-3 py-2 text-sm text-[#006492] hover:bg-gray-50"
           >
