@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import VenueManagerToggle from "@/components/profile/VenueManagerToggle";
 import ProfileMedia from "@/components/profile/ProfileMedia";
 import BookingsPanel from "@/components/profile/BookingsPanel";
-import MyVenuesPanel from "@/components/profile/MyVenuesPanel";
+import VenuesCarouselPanel from "@/components/profile/VenuesCarouselPanel"; // ⬅️ NEW
 import toast from "@/lib/toast";
 import {
   AVATAR_KEY,
@@ -16,10 +16,14 @@ import {
 import { getMyProfile } from "@/lib/authApi";
 
 // Synchronous localStorage read so first render gets the real values
-const LS_NAME = typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_NAME_KEY) : "";
-const LS_EMAIL = typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_EMAIL_KEY) : "";
-const LS_AVATAR = typeof localStorage !== "undefined" ? localStorage.getItem(AVATAR_KEY) : "";
-const LS_COVER = typeof localStorage !== "undefined" ? localStorage.getItem(COVER_KEY) : "";
+const LS_NAME =
+  typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_NAME_KEY) : "";
+const LS_EMAIL =
+  typeof localStorage !== "undefined" ? localStorage.getItem(PROFILE_EMAIL_KEY) : "";
+const LS_AVATAR =
+  typeof localStorage !== "undefined" ? localStorage.getItem(AVATAR_KEY) : "";
+const LS_COVER =
+  typeof localStorage !== "undefined" ? localStorage.getItem(COVER_KEY) : "";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -92,9 +96,14 @@ export default function Profile() {
         {/* Content (keeps logout on the white card) */}
         <div className="px-6 pb-8 pt-0">
           <div className="mt-8 space-y-6">
-            {/* Pass the resolved name; panel is resilient anyway */}
+            {/* Bookings carousels */}
             <BookingsPanel profileName={user.name} />
-            <MyVenuesPanel isManager={user.venueManager} />
+
+            {/* NEW: latest 6 venues carousel (only shows if venueManager) */}
+            <VenuesCarouselPanel
+              profileName={user.name}
+              isManager={user.venueManager}
+            />
           </div>
 
           <div className="mt-8 text-center">

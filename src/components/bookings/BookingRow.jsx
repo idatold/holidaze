@@ -33,11 +33,17 @@ export default function BookingRow({
         "data-[deleting=true]:opacity-0 data-[deleting=true]:scale-[0.98] data-[deleting=true]:-translate-y-0.5",
       ].join(" ")}
     >
-      <div className="flex items-center gap-4">
-        <Link to={`/venue/${v?.id || ""}`} className="shrink-0">
+      {/* stack on mobile: image → text → buttons; row from sm+ */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        {/* image */}
+        <Link
+          to={`/venue/${v?.id || ""}`}
+          className="shrink-0 w-full sm:w-auto"
+        >
           <div
             className={[
-              "h-20 w-28 rounded-lg overflow-hidden bg-foam shadow-sm",
+              // full-width, taller thumb on mobile; compact on sm+
+              "h-40 w-full sm:h-20 sm:w-28 rounded-lg overflow-hidden bg-foam shadow-sm",
               // light pink stroke on the thumbnail
               "border [border-color:rgba(210,51,147,.18)]",
               faded ? "grayscale" : "",
@@ -55,6 +61,7 @@ export default function BookingRow({
           </div>
         </Link>
 
+        {/* text */}
         <div className="min-w-0 flex-1">
           <Link
             to={`/venue/${v?.id || ""}`}
@@ -88,8 +95,8 @@ export default function BookingRow({
           )}
         </div>
 
-        {/* actions */}
-        <div className="flex items-center gap-2">
+        {/* buttons — centered on mobile, right-aligned on sm+ */}
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end pt-3 sm:pt-0 sm:ml-auto">
           <Link to={`/venue/${v?.id || ""}`} className="btn btn-pink">
             {cta}
           </Link>
