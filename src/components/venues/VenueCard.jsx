@@ -1,4 +1,4 @@
-// src/components/venues/VenueCard.jsx 
+// src/components/venues/VenueCard.jsx
 import { Link } from "react-router-dom";
 
 /* === import your Figma-exported SVGs here ============================= */
@@ -99,7 +99,12 @@ export default function VenueCard({
         {place && (
           <p className="mt-3 sm:mt-4 text-sm text-zinc-600 line-clamp-1 flex items-center justify-center gap-1.5">
             {locIconSrc && (
-              <img src={locIconSrc} alt="" className="h-4 w-4 inline-block" loading="lazy" />
+              <img
+                src={locIconSrc}
+                alt=""
+                className="h-4 w-4 inline-block"
+                loading="lazy"
+              />
             )}
             <span>{place}</span>
           </p>

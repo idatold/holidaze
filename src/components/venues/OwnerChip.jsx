@@ -1,14 +1,5 @@
-// src/components/venues/OwnerChip.jsx
 import { Link } from "react-router-dom";
 
-/**
- * OwnerChip (classic inline chip + "Hosted by" label)
- * Props:
- * - owner: { name?: string, avatar?: { url?: string, alt?: string }, venueManager?: boolean }
- * - className?: string
- * - label?: string (default: "Hosted by")
- * - linkBase?: string (default "/profile" -> /profile/:name)
- */
 export default function OwnerChip({
   owner,
   className = "",
@@ -17,11 +8,29 @@ export default function OwnerChip({
 }) {
   if (!owner) return null;
 
-  const name = owner?.name || "Owner";
+  const name = (owner?.name || "Owner").trim();
+
+  // Support either string or object for avatar
   const avatarUrl =
     typeof owner?.avatar === "string" ? owner.avatar : owner?.avatar?.url || "";
-  const avatarAlt = (owner?.avatar && owner?.avatar?.alt) || `${name} avatar`;
-  const to = name ? `${linkBase}/${encodeURIComponent(name)}` : undefined;
+  const avatarAlt =
+    (typeof owner?.avatar === "object" && owner?.avatar?.alt) ||
+    `${name} avatar`;
+
+  // Build link defensively: trim trailing slashes from base, URI-encode name.
+  // If linkBase is falsy (""/null/undefined), we render a non-clickable chip.
+  const base = String(linkBase || "").replace(/\/+$/, "");
+  const to = name && base ? `${base}/${encodeURIComponent(name)}` : undefined;
+
+  const ChipInner = (
+    <>
+      <Avatar src={avatarUrl} alt={avatarAlt} />
+      <div className="flex items-center gap-2">
+        <span className="font-semibold text-[#D23393]">{name}</span>
+        {owner?.venueManager && <VerifiedBadge />}
+      </div>
+    </>
+  );
 
   return (
     <div className={`mt-4 ${className}`}>
@@ -34,19 +43,11 @@ export default function OwnerChip({
           className="inline-flex items-center gap-3 rounded-[5px] bg-white/95 px-3 py-2 shadow ring-1 ring-zinc-200 transition hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#006492]/50"
           aria-label={`View ${name}'s profile`}
         >
-          <Avatar src={avatarUrl} alt={avatarAlt} />
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-[#D23393]">{name}</span>
-            {owner?.venueManager && <VerifiedBadge />}
-          </div>
+          {ChipInner}
         </Link>
       ) : (
         <div className="inline-flex items-center gap-3 rounded-[5px] bg-white/95 px-3 py-2 shadow ring-1 ring-zinc-200">
-          <Avatar src={avatarUrl} alt={avatarAlt} />
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-[#D23393]">{name}</span>
-            {owner?.venueManager && <VerifiedBadge />}
-          </div>
+          {ChipInner}
         </div>
       )}
     </div>
@@ -57,7 +58,7 @@ function Avatar({ src, alt }) {
   const size = "h-8 w-8 sm:h-9 sm:w-9";
   if (src) {
     return (
-      // eslint-disable-next-line jsx-a11y/img-redundant-alt
+    
       <img
         src={src}
         alt={alt}
@@ -105,7 +106,8 @@ function VerifiedBadge() {
           strokeLinejoin="round"
         />
       </svg>
-      <span>Venue manager</span>
+      <span className="sr-only">Venue manager</span>
+      <span aria-hidden="true">Venue manager</span>
     </span>
   );
 }

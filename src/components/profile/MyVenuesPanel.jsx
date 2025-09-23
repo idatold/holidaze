@@ -12,12 +12,13 @@ function EmptyState({ text, cta }) {
 export default function MyVenuesPanel({ isManager }) {
   return (
     <section>
-      <h2 className="mb-2 text-center font-higuen text-ocean text-xl">My venues</h2>
+      <h2 className="mb-2 text-center font-higuen text-ocean text-xl">
+        My venues
+      </h2>
 
       {isManager ? (
         <EmptyState
           text="Manage your venues from the My Venues page."
-          // ⛳️ Only navigate — no ?create=1 here
           cta={
             <Link to="/my-venues" className="btn btn-pink mt-2">
               Go to My Venues

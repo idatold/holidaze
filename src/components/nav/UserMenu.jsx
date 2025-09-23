@@ -29,7 +29,6 @@ export default function UserMenu() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isManager, setIsManager] = useState(false);
 
-  // hydrate from localStorage (instant UI)
   useEffect(() => {
     const n = localStorage.getItem(PROFILE_NAME_KEY) || "";
     const e = localStorage.getItem(PROFILE_EMAIL_KEY) || "";
@@ -39,7 +38,6 @@ export default function UserMenu() {
     setAvatarUrl(a);
   }, []);
 
-  // fetch fresh (keep avatar/email + manager synced with API)
   useEffect(() => {
     if (!name) return;
     let alive = true;
@@ -63,7 +61,6 @@ export default function UserMenu() {
     };
   }, [name]);
 
-  // when the dropdown opens, re-check venueManager to reflect recent toggles
   useEffect(() => {
     if (!open || !name) return;
     let alive = true;
@@ -78,12 +75,10 @@ export default function UserMenu() {
     };
   }, [open, name]);
 
-  // close on route change
   useEffect(() => {
     setOpen(false);
   }, [location]);
 
-  // click outside
   useEffect(() => {
     function onDocClick(e) {
       if (!rootRef.current) return;
@@ -102,7 +97,7 @@ export default function UserMenu() {
       confirmText: "Log out",
       cancelText: "Stay logged in",
       onConfirm: () => {
-        clearAuth(); // clears storage + emits auth change
+        clearAuth();
         toast.miniSuccess("Logged out");
         navigate("/login");
       },

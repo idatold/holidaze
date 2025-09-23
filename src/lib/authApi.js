@@ -1,14 +1,13 @@
 // src/lib/authApi.js
-import { api } from "./api";
+import { api, API_BASE } from "./api";
 
-// ---- API base + key (works in dev & prod) -----------------------------
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "https://v2.api.noroff.dev").replace(/\/+$/, "");
+// Build once from the shared base
 const AUTH_BASE = `${API_BASE}/auth`;
 const HOLIDAZE_BASE = `${API_BASE}/holidaze`;
-const API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
 
-// attach the Noroff API key header on every call from here
-const withKey = { headers: { "X-Noroff-API-Key": API_KEY } };
+const API_KEY = import.meta.env.VITE_NOROFF_API_KEY;
+// Only attach the key if it exists
+const withKey = API_KEY ? { headers: { "X-Noroff-API-Key": API_KEY } } : {};
 
 // POST /auth/register
 export async function registerUser({ name, email, password, venueManager }) {
@@ -20,7 +19,7 @@ export async function registerUser({ name, email, password, venueManager }) {
   return data?.data ?? data;
 }
 
-// POST /auth/login (no more ?_holidaze=true)
+// POST /auth/login
 export async function loginUser({ email, password }) {
   const { data } = await api.post(
     `${AUTH_BASE}/login`,

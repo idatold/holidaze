@@ -32,7 +32,9 @@ export default function Venue() {
     const raw = Array.isArray(venue?.media) ? venue.media : [];
     return raw
       .map((m) =>
-        typeof m === "string" ? { url: m, alt: venue?.name ?? "Venue image" } : m
+        typeof m === "string"
+          ? { url: m, alt: venue?.name ?? "Venue image" }
+          : m
       )
       .filter((m) => m?.url);
   }, [venue]);
@@ -49,7 +51,10 @@ export default function Venue() {
     (async () => {
       try {
         setLoading(true);
-        const res = await getVenue(id, { includeOwner: true, includeBookings: true });
+        const res = await getVenue(id, {
+          includeOwner: true,
+          includeBookings: true,
+        });
         if (!alive) return;
         setVenue(res?.data || null);
       } catch (e) {
@@ -58,7 +63,9 @@ export default function Venue() {
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [id]);
 
   // Create booking + immediately reflect it locally so the calendar disables the new range
@@ -68,7 +75,12 @@ export default function Venue() {
       throw new Error("Please log in to book this venue.");
     }
     try {
-      const created = await createBooking({ venueId: id, dateFrom, dateTo, guests });
+      const created = await createBooking({
+        venueId: id,
+        dateFrom,
+        dateTo,
+        guests,
+      });
       setVenue((v) => {
         const prev = Array.isArray(v?.bookings) ? v.bookings : [];
         const newBk = created?.data || { dateFrom, dateTo, guests };
@@ -105,7 +117,10 @@ export default function Venue() {
             <div className="h-[48svh] min-h-[240px] bg-zinc-100 rounded-[10px] animate-pulse" />
             <div className="flex gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 w-24 bg-zinc-100 rounded-[8px] animate-pulse" />
+                <div
+                  key={i}
+                  className="h-16 w-24 bg-zinc-100 rounded-[8px] animate-pulse"
+                />
               ))}
             </div>
           </div>
@@ -138,7 +153,7 @@ export default function Venue() {
         )}
       </div>
 
-      {/* Owner chip */}
+      {/* Owner chip (non-clickable) */}
       <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-4xl">
         {loading ? (
           <div className="mt-3 inline-flex items-center gap-3">
@@ -146,7 +161,7 @@ export default function Venue() {
             <div className="h-4 w-36 rounded bg-zinc-100 animate-pulse" />
           </div>
         ) : (
-          venue?.owner && <OwnerChip owner={venue.owner} />
+          venue?.owner && <OwnerChip owner={venue.owner} linkBase="" />
         )}
       </div>
 
@@ -165,7 +180,6 @@ export default function Venue() {
               </p>
             )}
             <BookingPanel
-              venueId={id}
               maxGuests={venue.maxGuests}
               bookings={venue.bookings}
               onBook={onBook}

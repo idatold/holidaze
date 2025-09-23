@@ -1,4 +1,3 @@
-// src/components/nav/Navbar.jsx
 import { Link, NavLink } from "react-router-dom";
 import logo from "@/assets/holidazebluelogo.svg";
 import UserMenu from "@/components/nav/UserMenu.jsx";
@@ -26,8 +25,13 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="bg-[#FAF6F4] shadow-md">
-      {/* align items to the bottom like your desktop header */}
+    <header
+      className="
+        sticky top-0 z-40
+        bg-[#FAF6F4] shadow-md
+        supports-[backdrop-filter]:bg-[#FAF6F4]/95 backdrop-blur
+      "
+    >
       <nav className="container mx-auto flex items-end justify-between px-4 py-3">
         <Link to="/" className="flex items-end gap-2">
           <img src={logo} alt="Holidaze" className="w-[150px] h-[63px]" />
@@ -35,12 +39,10 @@ export default function Navbar() {
 
         {/* Desktop (≥sm) */}
         <div className="hidden sm:flex items-center gap-5">
-          <NavLink to="/" className="nav-link">
-            Home
-          </NavLink>
           <NavLink to="/venues" className="nav-link">
-            Venues
+            Browse Venues
           </NavLink>
+
           {isLoggedIn ? (
             <UserMenu />
           ) : (
@@ -60,8 +62,8 @@ export default function Navbar() {
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
-          aria-expanded={mobileOpen} // ← add
-          aria-controls="mobile-menu" // ← add
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-menu"
           className="sm:hidden self-end rounded-[5px] p-2 hover:shadow-sm active:scale-[0.98] focus:outline-none -mb-[2px]"
         >
           <svg

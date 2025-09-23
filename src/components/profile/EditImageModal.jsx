@@ -1,13 +1,12 @@
-// src/components/profile/EditImageModal.jsx
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 
 export default function EditImageModal({
   open,
   onClose,
-  mode = "avatar",       // "avatar" | "cover"
+  mode = "avatar",
   initialUrl = "",
-  onSave,                // (url: string) => void
+  onSave,
 }) {
   const [url, setUrl] = useState(initialUrl || "");
   const [error, setError] = useState("");
@@ -43,7 +42,7 @@ export default function EditImageModal({
     <div
       className={[
         "relative mx-auto h-28 w-28 overflow-hidden rounded-full shadow-sm",
-        isHttp(url) ? "bg-sand" : "bg-ocean",        // ← ocean when empty
+        isHttp(url) ? "bg-sand" : "bg-ocean", // ← ocean when empty
       ].join(" ")}
     >
       {isHttp(url) ? (
@@ -65,7 +64,7 @@ export default function EditImageModal({
     <div
       className={[
         "relative aspect-[16/6] w-full overflow-hidden rounded shadow-sm",
-        isHttp(url) ? "bg-white" : "bg-ocean", 
+        isHttp(url) ? "bg-white" : "bg-ocean",
       ].join(" ")}
     >
       {isHttp(url) ? (
@@ -88,7 +87,7 @@ export default function EditImageModal({
       open={open}
       onClose={onClose}
       title={mode === "avatar" ? "Edit profile picture" : "Edit header photo"}
-      className="ring-2 ring-pink-500"   
+      className="ring-2 ring-pink-500"
     >
       <div className="space-y-4">
         {mode === "avatar" ? avatarPreview : coverPreview}
@@ -118,10 +117,18 @@ export default function EditImageModal({
         )}
 
         <div className="grid grid-cols-2 gap-4 pt-1">
-          <button type="button" onClick={onClose} className="btn btn-outline-pink w-full uppercase">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-outline-pink w-full uppercase"
+          >
             Cancel
           </button>
-          <button type="button" onClick={handleSave} className="btn btn-pink w-full uppercase shadow">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="btn btn-pink w-full uppercase shadow"
+          >
             {mode === "avatar" ? "Update photo" : "Update header"}
           </button>
         </div>

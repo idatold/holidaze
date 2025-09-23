@@ -1,5 +1,6 @@
+// src/routes/MyBookings.jsx
 import { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
 import { getStoredName, getAccessToken } from "@/lib/auth";
 import toast from "@/lib/toast";
@@ -14,9 +15,10 @@ const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
 
 export default function MyBookings() {
-  const nav = useNavigate();
+  // Still read these to build the endpoint + greet the user
   const authed = !!getAccessToken();
   const name = getStoredName();
+
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState({}); // { [bookingId]: true }
@@ -32,12 +34,16 @@ export default function MyBookings() {
   const today = useMemo(() => startOfDay(new Date()), []);
 
   useEffect(() => {
+    let alive = true;
+
+    // With RequireAuth guarding this route, authed should always be true.
+    // Keep a soft check + message in case localStorage is cleared.
     if (!authed || !name) {
-      toast.error("Please log in to see your bookings.");
-      nav("/login");
+      setLoading(false);
+      toast.error("We couldn’t detect your profile — please log in again.");
       return;
     }
-    let alive = true;
+
     (async () => {
       try {
         setLoading(true);
@@ -62,15 +68,16 @@ export default function MyBookings() {
         if (alive) setLoading(false);
       }
     })();
+
     return () => {
       alive = false;
     };
-  }, [authed, name, nav]);
+  }, [authed, name]);
 
   // Split into Active (not expired) vs Past (expired)
   const { active, past } = useMemo(() => {
-    const a = [],
-      p = [];
+    const a = [];
+    const p = [];
     for (const b of rows) {
       const to = safeDate(b?.dateTo);
       if (!to) continue;
@@ -124,10 +131,7 @@ export default function MyBookings() {
       {loading && (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-24 rounded-2xl bg-white/40 animate-pulse"
-            />
+            <div key={i} className="h-24 rounded-2xl bg-white/40 animate-pulse" />
           ))}
         </div>
       )}
@@ -198,6 +202,7 @@ function sortBookings(list, mode) {
   const get = (b, k) => {
     const d = k === "start" ? new Date(b.dateFrom) : new Date(b.dateTo);
     return d.getTime();
+    // eslint-disable-next-line no-unreachable
   };
   switch (mode) {
     case "startAsc":

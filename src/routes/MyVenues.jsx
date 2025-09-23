@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { getStoredName, getAccessToken } from "@/lib/auth";
 import { listVenuesByProfile, deleteVenue } from "@/lib/venues";
 import toast from "@/lib/toast";
@@ -7,9 +7,8 @@ import CreateVenueModal from "@/components/venues/CreateVenueModal";
 import VenueRow from "@/components/venues/VenueRow.jsx";
 
 export default function MyVenues() {
-  const token = getAccessToken?.();
-  const name = getStoredName?.();
-  const nav = useNavigate();
+  const token = getAccessToken();
+  const name = getStoredName();
   const [params, setParams] = useSearchParams();
 
   const [rows, setRows] = useState([]);
@@ -19,7 +18,7 @@ export default function MyVenues() {
   const [editing, setEditing] = useState(null); // a venue object or null
   const openCreate = params.get("create") === "1";
 
-  // clear any stale ?create=1
+  // clear any stale ?create=1 (e.g., after refresh)
   useEffect(() => {
     if (params.get("create") === "1") {
       setParams(
@@ -35,12 +34,15 @@ export default function MyVenues() {
   }, []);
 
   useEffect(() => {
+    let alive = true;
+
+    // Soft guard: this route is protected by RequireAuth, but keep a friendly message
     if (!token || !name) {
+      setLoading(false);
       toast.error("Please log in to manage your venues.");
-      nav("/login");
       return;
     }
-    let alive = true;
+
     (async () => {
       try {
         setLoading(true);
@@ -57,10 +59,11 @@ export default function MyVenues() {
         if (alive) setLoading(false);
       }
     })();
+
     return () => {
       alive = false;
     };
-  }, [token, name, nav]);
+  }, [token, name]);
 
   function openModal() {
     setParams(
@@ -128,7 +131,10 @@ export default function MyVenues() {
       {loading && (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-white/40 animate-pulse" />
+            <div
+              key={i}
+              className="h-24 rounded-2xl bg-white/40 animate-pulse"
+            />
           ))}
         </div>
       )}
@@ -143,10 +149,17 @@ export default function MyVenues() {
       {/* Venues list */}
       {!loading && hasVenues && (
         <section className="mt-6 rounded-2xl bg-white shadow-md ring-1 ring-black/5 p-4 sm:p-5">
-          <h2 className="font-arsenal font-semibold text-xl text-ink">Your venues</h2>
+          <h2 className="font-arsenal font-semibold text-xl text-ink">
+            Your venues
+          </h2>
           <ul className="mt-3 space-y-3">
             {rows.map((v) => (
-              <VenueRow key={v.id} venue={v} onEdit={onEdit} onDelete={onDelete} />
+              <VenueRow
+                key={v.id}
+                venue={v}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </ul>
         </section>

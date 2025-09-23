@@ -1,17 +1,11 @@
-// src/components/ui/BrandRangeCalendar.jsx
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-/**
- * Inline brand range calendar — single month, no outer ring.
- * It adds `hz-day-booked` (+ edge helpers) to days inside `excludeDateIntervals`
- * so you can style booked days via CSS without !important.
- */
 export default function BrandRangeCalendar({
   value = [null, null],
   onChange,
   minDate,
-  excludeDateIntervals,   // [{ start: Date, end: Date }]
+  excludeDateIntervals,
   excludeDates,
   className = "",
   calendarClassName = "",
@@ -19,14 +13,15 @@ export default function BrandRangeCalendar({
 }) {
   const [startDate, endDate] = value;
 
-  // Normalize intervals once: start-of-day ms timestamps
   const intervals = Array.isArray(excludeDateIntervals)
     ? excludeDateIntervals
         .map((iv) => ({
           s: startOfDay(iv?.start)?.getTime?.() ?? NaN,
           e: startOfDay(iv?.end)?.getTime?.() ?? NaN,
         }))
-        .filter((iv) => Number.isFinite(iv.s) && Number.isFinite(iv.e) && iv.e >= iv.s)
+        .filter(
+          (iv) => Number.isFinite(iv.s) && Number.isFinite(iv.e) && iv.e >= iv.s
+        )
     : [];
 
   function dayClassName(date) {
@@ -52,10 +47,10 @@ export default function BrandRangeCalendar({
         endDate={endDate}
         onChange={onChange}
         minDate={minDate}
-        monthsShown={1}                          // one month only
+        monthsShown={1}
         excludeDateIntervals={excludeDateIntervals}
         excludeDates={excludeDates}
-        calendarClassName={`hz-datepicker ${calendarClassName}`} // uses your branded styles
+        calendarClassName={`hz-datepicker ${calendarClassName}`}
         dayClassName={dayClassName}
         {...rest}
       />
@@ -63,7 +58,6 @@ export default function BrandRangeCalendar({
   );
 }
 
-/* utils */
 function startOfDay(d) {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);

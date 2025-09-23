@@ -1,5 +1,4 @@
-// src/routes/Auth/Login.jsx
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "@/lib/authApi";
 import { storeAccessToken, storeProfileBasics, emitAuthChange } from "@/lib/auth";
@@ -11,6 +10,7 @@ export default function Login() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -36,7 +36,10 @@ export default function Login() {
       emitAuthChange();
 
       toast.miniSuccess(`Welcome, ${user.name}`);
-      navigate("/profile");
+
+      // If RequireAuth set a redirect, go there; else go to profile
+      const from = location.state?.from?.pathname || "/profile";
+      navigate(from, { replace: true });
     } catch (e) {
       // Prefer Noroff v2 error shape -> errors[0].message
       const m =
