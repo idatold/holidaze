@@ -27,6 +27,7 @@ export default function UserMenu() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [isManager, setIsManager] = useState(false);
 
   // hydrate from localStorage (instant UI)
   useEffect(() => {
@@ -38,11 +39,13 @@ export default function UserMenu() {
     setAvatarUrl(a);
   }, []);
 
-  // fetch fresh (keep avatar/email synced with API)
+  // fetch fresh (keep avatar/email + manager synced with API)
   useEffect(() => {
     if (!name) return;
+    let alive = true;
     getMyProfile(name, { bookings: false, venues: false })
       .then((p) => {
+        if (!alive) return;
         const url = p?.avatar?.url || "";
         if (url) {
           setAvatarUrl(url);
@@ -52,9 +55,28 @@ export default function UserMenu() {
           setEmail(p.email);
           localStorage.setItem(PROFILE_EMAIL_KEY, p.email);
         }
+        setIsManager(Boolean(p?.venueManager));
       })
       .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [name]);
+
+  // when the dropdown opens, re-check venueManager to reflect recent toggles
+  useEffect(() => {
+    if (!open || !name) return;
+    let alive = true;
+    getMyProfile(name, { bookings: false, venues: false })
+      .then((p) => {
+        if (!alive) return;
+        setIsManager(Boolean(p?.venueManager));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [open, name]);
 
   // close on route change
   useEffect(() => {
@@ -151,7 +173,6 @@ export default function UserMenu() {
             My profile
           </Link>
 
-          {/* 🔁 bookings already on /bookings */}
           <Link
             to="/bookings"
             role="menuitem"
@@ -160,14 +181,16 @@ export default function UserMenu() {
             My bookings
           </Link>
 
-          {/* ✅ updated: go straight to /my-venues (no hash, no query) */}
-          <Link
-            to="/my-venues"
-            role="menuitem"
-            className="block rounded px-3 py-2 text-sm text-[#006492] hover:bg-gray-50"
-          >
-            My venues
-          </Link>
+          {/* Only show for venue managers */}
+          {isManager && (
+            <Link
+              to="/my-venues"
+              role="menuitem"
+              className="block rounded px-3 py-2 text-sm text-[#006492] hover:bg-gray-50"
+            >
+              My venues
+            </Link>
+          )}
 
           <button
             onClick={handleLogout}

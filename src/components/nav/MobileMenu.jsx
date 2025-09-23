@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/holidazebluelogo.svg";
 import toast from "@/lib/toast";
@@ -8,6 +8,7 @@ import {
   AVATAR_KEY,
   clearAuth,
 } from "@/lib/auth";
+import { getMyProfile } from "@/lib/authApi";
 
 export default function MobileMenu({ isLoggedIn, onClose }) {
   const navigate = useNavigate();
@@ -16,6 +17,23 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
   const name = localStorage.getItem(PROFILE_NAME_KEY) || "";
   const email = localStorage.getItem(PROFILE_EMAIL_KEY) || "";
   const avatarUrl = localStorage.getItem(AVATAR_KEY) || "";
+  const [isManager, setIsManager] = useState(false);
+
+  // fetch venueManager when menu opens (component mounts)
+  useEffect(() => {
+    let alive = true;
+    if (isLoggedIn && name) {
+      getMyProfile(name, { bookings: false, venues: false })
+        .then((p) => {
+          if (!alive) return;
+          setIsManager(Boolean(p?.venueManager));
+        })
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+    };
+  }, [isLoggedIn, name]);
 
   // Prevent background scroll while open
   useEffect(() => {
@@ -77,11 +95,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       >
         {/* Header row */}
         <div className="flex items-end justify-between">
-          <Link
-            to="/"
-            onClick={() => goto("/")}
-            className="flex items-end gap-2"
-          >
+          <Link to="/" onClick={() => goto("/")} className="flex items-end gap-2">
             <img src={logo} alt="Holidaze" className="h-[40px] w-auto" />
           </Link>
           <button
@@ -91,13 +105,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
             onClick={onClose}
             className="rounded-[5px] p-2 hover:shadow-sm active:scale-[0.98] focus:outline-none"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="22"
-              height="22"
-              fill="#006492"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#006492" aria-hidden="true">
               <path d="M6.4 5l12.6 12.6-1.4 1.4L5 6.4 6.4 5z" />
               <path d="M18.6 5L5.9 17.6l1.4 1.4L20 6.4 18.6 5z" />
             </svg>
@@ -121,15 +129,11 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-[#79BAEC] text-white grid place-items-center ring-1 ring-black/5">
-                  <span className="text-sm font-bold">
-                    {name.slice(0, 2).toUpperCase()}
-                  </span>
+                  <span className="text-sm font-bold">{name.slice(0, 2).toUpperCase()}</span>
                 </div>
               )}
               <div>
-                <div className="text-sm font-semibold text-[#006492]">
-                  {name}
-                </div>
+                <div className="text-sm font-semibold text-[#006492]">{name}</div>
                 <div className="text-[11px] text-gray-500">{email}</div>
               </div>
             </div>
@@ -172,14 +176,16 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
                 My bookings
               </button>
 
-              {/* ✅ Just navigate to /my-venues — no query params */}
-              <button
-                type="button"
-                onClick={() => goto("/my-venues")}
-                className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
-              >
-                My venues
-              </button>
+              {/* Only for venue managers */}
+              {isManager && (
+                <button
+                  type="button"
+                  onClick={() => goto("/my-venues")}
+                  className="block w-full text-left rounded px-2 py-2 text-sm text-[#006492] hover:bg-white"
+                >
+                  My venues
+                </button>
+              )}
 
               <button
                 type="button"
