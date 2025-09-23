@@ -128,7 +128,10 @@ export default function MyVenues() {
       {loading && (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-white/40 animate-pulse" />
+            <div
+              key={i}
+              className="h-24 rounded-2xl bg-white/40 animate-pulse"
+            />
           ))}
         </div>
       )}
@@ -143,10 +146,17 @@ export default function MyVenues() {
       {/* Venues list */}
       {!loading && hasVenues && (
         <section className="mt-6 rounded-2xl bg-white shadow-md ring-1 ring-black/5 p-4 sm:p-5">
-          <h2 className="font-arsenal font-semibold text-xl text-ink">Your venues</h2>
+          <h2 className="font-arsenal font-semibold text-xl text-ink">
+            Your venues
+          </h2>
           <ul className="mt-3 space-y-3">
             {rows.map((v) => (
-              <VenueRow key={v.id} venue={v} onEdit={onEdit} onDelete={onDelete} />
+              <VenueRow
+                key={v.id}
+                venue={v}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </ul>
         </section>
