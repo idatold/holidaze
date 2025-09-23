@@ -1,23 +1,48 @@
+// src/routes/Home.jsx
 import { Link } from "react-router-dom";
-import logo from "../assets/holidazewhitelogo.svg";
-import heroMp4 from "../assets/hero-1080p.mp4";
-import heroPoster from "../assets/landing-hero.jpg"; // ← fallback image
+import { useEffect, useState } from "react";
+import { PROFILE_NAME_KEY, AUTH_CHANGED_EVENT } from "@/lib/auth";
+import logo from "@/assets/holidazewhitelogo.svg";
+import heroMp4 from "@/assets/hero-1080p.mp4";
+import heroPoster from "@/assets/landing-hero.jpg"; // fallback image
 
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const check = () =>
+      setIsLoggedIn(Boolean(localStorage.getItem(PROFILE_NAME_KEY)));
+    check();
+    window.addEventListener("storage", check);
+    window.addEventListener(AUTH_CHANGED_EVENT, check);
+    return () => {
+      window.removeEventListener("storage", check);
+      window.removeEventListener(AUTH_CHANGED_EVENT, check);
+    };
+  }, []);
+
   return (
     <main className="relative min-h-[100svh] overflow-hidden">
-      {/* Mobile fallback image */}
+      {/* Background image (mobile) + reduced-motion fallback (≥sm) */}
       <img
         src={heroPoster}
-        alt="ocean waves moving onto land from above"
-        className="absolute inset-0 h-full w-full object-cover sm:hidden"
+        alt=""
+        className="
+          absolute inset-0 h-full w-full object-cover
+          sm:hidden
+          sm:motion-reduce:block   /* show image on desktop if user prefers reduced motion */
+        "
         aria-hidden="true"
         draggable="false"
       />
 
-      {/* Background video (≥640px) */}
+      {/* Background video (≥640px, hidden for reduced motion) */}
       <video
-        className="absolute inset-0 hidden h-full w-full object-cover sm:block"
+        className="
+          absolute inset-0 hidden h-full w-full object-cover
+          sm:block
+          motion-reduce:hidden
+        "
         autoPlay
         muted
         loop
@@ -40,6 +65,7 @@ export default function Home() {
             src={logo}
             alt="Holidaze"
             className="mx-auto mb-4 w-[378px] h-[174px] select-none"
+            draggable="false"
           />
 
           {/* Tagline — Arsenal Bold 32px */}
@@ -56,12 +82,21 @@ export default function Home() {
               SEE VENUES
             </Link>
 
-            <Link
-              to="/login"
-              className="text-white text-[16px] font-arsenal font-bold uppercase tracking-wide hover:underline underline-offset-4 text-shadow"
-            >
-              LOG IN
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                to="/profile"
+                className="text-white text-[16px] font-arsenal font-bold uppercase tracking-wide hover:underline underline-offset-4 text-shadow"
+              >
+                PROFILE
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="text-white text-[16px] font-arsenal font-bold uppercase tracking-wide hover:underline underline-offset-4 text-shadow"
+              >
+                LOG IN
+              </Link>
+            )}
           </div>
         </div>
       </section>

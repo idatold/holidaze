@@ -4,7 +4,6 @@ import toast from "@/lib/toast";
 import BrandRangeCalendar from "@/components/ui/BrandRangeCalendar";
 
 export default function BookingPanel({
-  venueId,
   maxGuests = 1,
   bookings = [],
   onBook,

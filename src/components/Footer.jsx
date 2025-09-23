@@ -32,10 +32,7 @@ export default function Footer() {
           <Link to="/" className="text-base font-semibold hover:underline">
             Home
           </Link>
-          <Link
-            to="/venues"
-            className="text-base font-semibold hover:underline"
-          >
+          <Link to="/venues" className="text-base font-semibold hover:underline">
             Venues
           </Link>
 
@@ -51,12 +48,11 @@ export default function Footer() {
         </div>
 
         {/* Divider line */}
-        <div className="w-full border-t border-white my-4"></div>
+        <div className="w-full border-t border-white my-4" />
 
         {/* Copyright */}
         <p className="text-white text-sm italic mt-12">
-          &copy; {new Date().getFullYear()} <em>Holidaze™</em>. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} <em>Holidaze™</em>. All rights reserved.
         </p>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { getStoredName, getAccessToken } from "@/lib/auth";
 import { listVenuesByProfile, deleteVenue } from "@/lib/venues";
 import toast from "@/lib/toast";
@@ -7,9 +7,8 @@ import CreateVenueModal from "@/components/venues/CreateVenueModal";
 import VenueRow from "@/components/venues/VenueRow.jsx";
 
 export default function MyVenues() {
-  const token = getAccessToken?.();
-  const name = getStoredName?.();
-  const nav = useNavigate();
+  const token = getAccessToken();
+  const name = getStoredName();
   const [params, setParams] = useSearchParams();
 
   const [rows, setRows] = useState([]);
@@ -19,7 +18,7 @@ export default function MyVenues() {
   const [editing, setEditing] = useState(null); // a venue object or null
   const openCreate = params.get("create") === "1";
 
-  // clear any stale ?create=1
+  // clear any stale ?create=1 (e.g., after refresh)
   useEffect(() => {
     if (params.get("create") === "1") {
       setParams(
@@ -35,12 +34,15 @@ export default function MyVenues() {
   }, []);
 
   useEffect(() => {
+    let alive = true;
+
+    // Soft guard: this route is protected by RequireAuth, but keep a friendly message
     if (!token || !name) {
+      setLoading(false);
       toast.error("Please log in to manage your venues.");
-      nav("/login");
       return;
     }
-    let alive = true;
+
     (async () => {
       try {
         setLoading(true);
@@ -57,10 +59,11 @@ export default function MyVenues() {
         if (alive) setLoading(false);
       }
     })();
+
     return () => {
       alive = false;
     };
-  }, [token, name, nav]);
+  }, [token, name]);
 
   function openModal() {
     setParams(

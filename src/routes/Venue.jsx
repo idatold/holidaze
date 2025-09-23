@@ -180,7 +180,6 @@ export default function Venue() {
               </p>
             )}
             <BookingPanel
-              venueId={id}
               maxGuests={venue.maxGuests}
               bookings={venue.bookings}
               onBook={onBook}

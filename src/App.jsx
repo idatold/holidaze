@@ -12,12 +12,17 @@ import RequireAuth from "@/routes/guards/RequireAuth.jsx";
 import NotFound from "@/routes/Auth/NotFound.jsx";
 import MyVenues from "@/routes/MyVenues";
 
+import ScrollToTop from "@/utils/ScrollToTop.jsx";
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+      {/* ensures new routes start at top */}
+
       {/* Notifications (success/error/info): bottom-right */}
       <ToastContainer
         position="bottom-right"

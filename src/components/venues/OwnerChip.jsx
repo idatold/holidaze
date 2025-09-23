@@ -58,7 +58,7 @@ function Avatar({ src, alt }) {
   const size = "h-8 w-8 sm:h-9 sm:w-9";
   if (src) {
     return (
-      // eslint-disable-next-line jsx-a11y/img-redundant-alt
+    
       <img
         src={src}
         alt={alt}
