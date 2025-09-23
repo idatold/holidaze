@@ -1,4 +1,3 @@
-// src/components/nav/Navbar.jsx
 import { Link, NavLink } from "react-router-dom";
 import logo from "@/assets/holidazebluelogo.svg";
 import UserMenu from "@/components/nav/UserMenu.jsx";
@@ -33,7 +32,6 @@ export default function Navbar() {
         supports-[backdrop-filter]:bg-[#FAF6F4]/95 backdrop-blur
       "
     >
-      {/* align items to the bottom like your desktop header */}
       <nav className="container mx-auto flex items-end justify-between px-4 py-3">
         <Link to="/" className="flex items-end gap-2">
           <img src={logo} alt="Holidaze" className="w-[150px] h-[63px]" />
@@ -41,7 +39,6 @@ export default function Navbar() {
 
         {/* Desktop (≥sm) */}
         <div className="hidden sm:flex items-center gap-5">
-          {/* Home removed */}
           <NavLink to="/venues" className="nav-link">
             Browse Venues
           </NavLink>

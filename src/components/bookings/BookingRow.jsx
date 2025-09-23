@@ -1,4 +1,3 @@
-// src/components/bookings/BookingRow.jsx
 import { Link } from "react-router-dom";
 
 export default function BookingRow({
@@ -14,7 +13,6 @@ export default function BookingRow({
   const from = safeDate(booking?.dateFrom);
   const to = safeDate(booking?.dateTo);
 
-  // price bits
   const nightly = toNumber(v?.price);
   const nightsCount = from && to ? nights(from, to) : null;
   const showPrice =
@@ -25,7 +23,6 @@ export default function BookingRow({
     <li
       data-deleting={deleting ? "true" : "false"}
       className={[
-        // faint brand-pink outline + soft shadow (no black ring)
         "rounded-xl bg-white p-3 sm:p-4 shadow transition-all duration-200 border",
         "[border-color:rgba(210,51,147,.20)]", // #D23393 @ 20%
         faded ? "opacity-90" : "",
@@ -33,7 +30,6 @@ export default function BookingRow({
         "data-[deleting=true]:opacity-0 data-[deleting=true]:scale-[0.98] data-[deleting=true]:-translate-y-0.5",
       ].join(" ")}
     >
-      {/* stack on mobile: image → text → buttons; row from sm+ */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         {/* image */}
         <Link
@@ -42,9 +38,8 @@ export default function BookingRow({
         >
           <div
             className={[
-              // full-width, taller thumb on mobile; compact on sm+
               "h-40 w-full sm:h-20 sm:w-28 rounded-lg overflow-hidden bg-foam shadow-sm",
-              // light pink stroke on the thumbnail
+
               "border [border-color:rgba(210,51,147,.18)]",
               faded ? "grayscale" : "",
             ].join(" ")}
@@ -61,7 +56,6 @@ export default function BookingRow({
           </div>
         </Link>
 
-        {/* text */}
         <div className="min-w-0 flex-1">
           <Link
             to={`/venue/${v?.id || ""}`}
@@ -70,7 +64,6 @@ export default function BookingRow({
             {title}
           </Link>
 
-          {/* dates + guests */}
           <div className="mt-1 text-sm text-ink/70">
             {from && to ? (
               <>
@@ -83,7 +76,6 @@ export default function BookingRow({
             )}
           </div>
 
-          {/* price line (only when venue.price exists) */}
           {showPrice && (
             <div className="mt-1 text-sm text-ink/90">
               <span className="font-medium">{nok(nightly)}</span>{" "}
@@ -95,7 +87,6 @@ export default function BookingRow({
           )}
         </div>
 
-        {/* buttons — centered on mobile, right-aligned on sm+ */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-center sm:justify-end pt-3 sm:pt-0 sm:ml-auto">
           <Link to={`/venue/${v?.id || ""}`} className="btn btn-pink">
             {cta}
@@ -118,7 +109,6 @@ export default function BookingRow({
   );
 }
 
-/* local utils (kept inline for drop-in) */
 function safeDate(v) {
   const d = new Date(v);
   return isNaN(d) ? null : d;

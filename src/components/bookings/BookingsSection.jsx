@@ -1,17 +1,3 @@
-// src/components/bookings/BookingsSection.jsx
-/**
- * White card section with a header and a list grid.
- *
- * Props:
- * - id: string (for aria-labelledby)
- * - title: string
- * - count: number
- * - items: any[]
- * - hiddenWhenEmpty?: boolean = true
- * - emptyText?: string
- * - actions?: ReactNode (appears in header on the right)
- * - children: list items (<li>…</li>) rendered inside a <ul>
- */
 export default function BookingsSection({
   id,
   title,
@@ -26,7 +12,6 @@ export default function BookingsSection({
 
   return (
     <section className="mt-8" aria-labelledby={id}>
-      {/* clean card: no outer ring, just a soft shadow */}
       <div className="rounded-2xl bg-white shadow-md">
         <header
           className="
@@ -35,12 +20,11 @@ export default function BookingsSection({
             [border-color:rgba(210,51,147,.25)]   /* subtle brand-pink divider */
           "
         >
-          {/* Arsenal section title, black ink */}
           <h2 id={id} className="font-arsenal text-xl font-semibold text-ink">
             {title}
           </h2>
 
-          <div className="flex items-center gap-3">
+         <div className="flex flex-wrap items-center gap-3">
             {actions}
             <span className="text-sm text-ink/70">{count}</span>
           </div>

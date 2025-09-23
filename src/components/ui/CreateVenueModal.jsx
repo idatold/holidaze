@@ -1,4 +1,3 @@
-// components/ui/CreateVenueModal.jsx
 import { useUIStore } from "@/store/uiStore";
 
 export default function CreateVenueModal() {

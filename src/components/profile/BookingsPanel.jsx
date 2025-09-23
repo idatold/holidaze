@@ -1,4 +1,3 @@
-// src/components/profile/BookingsPanel.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
@@ -6,7 +5,6 @@ import { getStoredName, getAccessToken } from "@/lib/auth";
 import toast from "@/lib/toast";
 import VenueCard from "@/components/venues/VenueCard";
 
-/* same prefix logic as MyBookings.jsx */
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
@@ -57,12 +55,10 @@ function EmptyState({ text }) {
   );
 }
 
-/* Reusable one-card-at-a-time carousel */
 function CardCarousel({ items, renderItem }) {
   const [index, setIndex] = useState(0);
   const viewportWidths = "w-[240px] sm:w-[260px] md:w-[280px]";
 
-  // keep index in bounds when data changes
   useEffect(() => {
     setIndex((i) => (items.length ? Math.min(i, items.length - 1) : 0));
   }, [items.length]);
@@ -89,7 +85,6 @@ function CardCarousel({ items, renderItem }) {
           </div>
         </div>
 
-        {/* Bigger ocean-blue arrows — no background, a bit farther from card */}
         {items.length > 1 && (
           <>
             <button
@@ -126,7 +121,6 @@ function CardCarousel({ items, renderItem }) {
         )}
       </div>
 
-      {/* dots — bigger, greyed out for inactive, clickable */}
       {items.length > 1 && (
         <div className="mt-3 mb-2 flex justify-center gap-2">
           {items.map((_, i) => (
@@ -217,7 +211,6 @@ export default function BookingsPanel({ profileName }) {
 
   return (
     <section>
-      {/* My bookings heading is a link */}
       <SectionTitleLink to="/bookings">My bookings</SectionTitleLink>
 
       {!token ? (

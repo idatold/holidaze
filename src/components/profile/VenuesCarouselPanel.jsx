@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+// src/components/profile/VenuesCarouselPanel.jsx
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
 import { getStoredName, getAccessToken } from "@/lib/auth";
 import toast from "@/lib/toast";
 import VenueCard from "@/components/venues/VenueCard";
 
-/* same prefix logic as your BookingsPanel/MyBookings.jsx */
+/* holidaze prefix helper (same as elsewhere) */
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
 
-/* UI bits matched to BookingsPanel */
+/* tiny UI helpers to match BookingsPanel look */
 function SectionTitleLink({ children, to }) {
   return (
     <Link
@@ -21,7 +22,6 @@ function SectionTitleLink({ children, to }) {
     </Link>
   );
 }
-
 function SubTitle({ children, className = "" }) {
   return (
     <h3
@@ -34,8 +34,7 @@ function SubTitle({ children, className = "" }) {
     </h3>
   );
 }
-
-function EmptyState({ text, cta }) {
+function EmptyState({ text, cta = null }) {
   return (
     <div className="mx-auto mt-2 rounded-[5px] border border-dashed border-[#006492]/30 p-4 text-center text-sm text-ocean/80 w-[240px] sm:w-[260px] md:w-[280px]">
       <p>{text}</p>
@@ -44,7 +43,7 @@ function EmptyState({ text, cta }) {
   );
 }
 
-/* Reusable one-card-at-a-time carousel (identical visuals to BookingsPanel) */
+/* Reusable one-card-at-a-time carousel (same as bookings panel) */
 function CardCarousel({ items, renderItem }) {
   const [index, setIndex] = useState(0);
   const viewportWidths = "w-[240px] sm:w-[260px] md:w-[280px]";
@@ -75,7 +74,6 @@ function CardCarousel({ items, renderItem }) {
           </div>
         </div>
 
-        {/* arrows */}
         {items.length > 1 && (
           <>
             <button
@@ -89,7 +87,9 @@ function CardCarousel({ items, renderItem }) {
                 text-ocean hover:scale-105 active:scale-95 focus:outline-none
               "
             >
-              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">‹</span>
+              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">
+                ‹
+              </span>
             </button>
             <button
               type="button"
@@ -102,13 +102,14 @@ function CardCarousel({ items, renderItem }) {
                 text-ocean hover:scale-105 active:scale-95 focus:outline-none
               "
             >
-              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">›</span>
+              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">
+                ›
+              </span>
             </button>
           </>
         )}
       </div>
 
-      {/* dots */}
       {items.length > 1 && (
         <div className="mt-3 mb-2 flex justify-center gap-2">
           {items.map((_, i) => (
@@ -130,21 +131,19 @@ function CardCarousel({ items, renderItem }) {
   );
 }
 
-/**
- * Venues carousel for Profile page.
- * - Shows the **latest 6** venues created by the user.
- * - Only renders when logged in; optionally hide when not a venue manager.
- */
-export default function VenuesCarouselPanel({ profileName, isManager = true, hideWhenNotManager = true }) {
-  const token = getAccessToken?.();
-  const fromAuth = getStoredName?.();
+export default function VenuesCarouselPanel({
+  profileName,
+  isManager = false, // ← only render if true
+}) {
+  /* hide entirely when not a venue manager */
+  if (!isManager) return null;
+
+  const token = getAccessToken();
+  const fromAuth = getStoredName();
   const name = profileName || fromAuth;
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Optionally hide if user isn't a venue manager
-  if (hideWhenNotManager && !isManager) return null;
 
   useEffect(() => {
     let alive = true;
@@ -152,30 +151,26 @@ export default function VenuesCarouselPanel({ profileName, isManager = true, hid
       setLoading(false);
       return;
     }
-
     (async () => {
       try {
         setLoading(true);
         const { data } = await api.get(
           h(`/profiles/${encodeURIComponent(name)}/venues`),
-          {
-            params: {
-              sort: "created",
-              sortOrder: "desc",
-              limit: 6, // latest 6
-            },
-          }
+          { params: { sort: "created", sortOrder: "desc", limit: 6 } }
         );
         if (!alive) return;
         setRows(Array.isArray(data?.data) ? data.data : []);
       } catch (e) {
         if (alive)
-          toast.error(e?.response?.data?.message || e?.message || "Couldn’t load your venues");
+          toast.error(
+            e?.response?.data?.message ||
+              e?.message ||
+              "Couldn’t load your venues"
+          );
       } finally {
         if (alive) setLoading(false);
       }
     })();
-
     return () => {
       alive = false;
     };
@@ -183,7 +178,6 @@ export default function VenuesCarouselPanel({ profileName, isManager = true, hid
 
   return (
     <section>
-      {/* My venues heading is a link */}
       <SectionTitleLink to="/my-venues">My venues</SectionTitleLink>
 
       {!token ? (

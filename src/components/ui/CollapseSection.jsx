@@ -1,13 +1,5 @@
-// src/components/ui/CollapseSection.jsx
 import { useEffect, useRef, useState } from "react";
 
-/**
- * CollapseSection
- * - title: string
- * - defaultOpen?: boolean (default false)
- * - persistKey?: string (optional localStorage key to remember state)
- * - className?: string
- */
 export default function CollapseSection({
   title,
   defaultOpen = false,
@@ -15,10 +7,10 @@ export default function CollapseSection({
   className = "",
   children,
 }) {
-  // initial state (optionally from localStorage)
   const [open, setOpen] = useState(() => {
     if (persistKey) {
-      const v = typeof window !== "undefined" ? localStorage.getItem(persistKey) : null;
+      const v =
+        typeof window !== "undefined" ? localStorage.getItem(persistKey) : null;
       if (v === "1") return true;
       if (v === "0") return false;
     }
@@ -28,7 +20,6 @@ export default function CollapseSection({
   const contentRef = useRef(null);
   const [maxH, setMaxH] = useState(0);
 
-  // Measure content height and set max-height accordingly
   const measure = () => {
     if (!contentRef.current) return;
     const h = contentRef.current.scrollHeight;
@@ -37,15 +28,13 @@ export default function CollapseSection({
 
   useEffect(() => {
     measure();
-    // re-measure on resize while open
+
     if (!open) return;
     const onResize = () => requestAnimationFrame(measure);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, children]);
 
-  // persist state if requested
   useEffect(() => {
     if (!persistKey) return;
     try {
@@ -86,7 +75,6 @@ export default function CollapseSection({
         </svg>
       </button>
 
-      {/* Content with max-height animation */}
       <div
         style={{ maxHeight: maxH }}
         className="overflow-hidden transition-[max-height] duration-300 ease-out will-change-[max-height]"

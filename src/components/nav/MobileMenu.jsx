@@ -19,7 +19,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
   const avatarUrl = localStorage.getItem(AVATAR_KEY) || "";
   const [isManager, setIsManager] = useState(false);
 
-  // fetch venueManager when menu opens (component mounts)
   useEffect(() => {
     let alive = true;
     if (isLoggedIn && name) {
@@ -35,7 +34,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
     };
   }, [isLoggedIn, name]);
 
-  // Prevent background scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -44,12 +42,10 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
     };
   }, []);
 
-  // Focus the close button on open (keyboard-friendly)
   useEffect(() => {
     closeBtnRef.current?.focus();
   }, []);
 
-  // Close on ESC
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") onClose?.();
@@ -84,7 +80,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       aria-modal="true"
       onMouseDown={onClose} // backdrop closes on mousedown
     >
-      {/* Dim background */}
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Panel */}
@@ -95,7 +90,8 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       >
         {/* Header row */}
         <div className="flex items-end justify-between">
-          <Link to="/" onClick={() => goto("/")} className="flex items-end gap-2">
+          {/* Use Link navigation; just close the sheet on click */}
+          <Link to="/" onClick={onClose} className="flex items-end gap-2">
             <img src={logo} alt="Holidaze" className="h-[40px] w-auto" />
           </Link>
           <button
@@ -105,7 +101,13 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
             onClick={onClose}
             className="rounded-[5px] p-2 hover:shadow-sm active:scale-[0.98] focus:outline-none"
           >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="#006492" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="#006492"
+              aria-hidden="true"
+            >
               <path d="M6.4 5l12.6 12.6-1.4 1.4L5 6.4 6.4 5z" />
               <path d="M18.6 5L5.9 17.6l1.4 1.4L20 6.4 18.6 5z" />
             </svg>
@@ -129,11 +131,15 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-[#79BAEC] text-white grid place-items-center ring-1 ring-black/5">
-                  <span className="text-sm font-bold">{name.slice(0, 2).toUpperCase()}</span>
+                  <span className="text-sm font-bold">
+                    {name.slice(0, 2).toUpperCase()}
+                  </span>
                 </div>
               )}
               <div>
-                <div className="text-sm font-semibold text-[#006492]">{name}</div>
+                <div className="text-sm font-semibold text-[#006492]">
+                  {name}
+                </div>
                 <div className="text-[11px] text-gray-500">{email}</div>
               </div>
             </div>
@@ -142,7 +148,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
 
         {/* Links */}
         <nav className="mt-3">
-          {/* Home removed; logo navigates home */}
           <button
             type="button"
             onClick={() => goto("/venues")}
@@ -210,7 +215,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
         </nav>
       </div>
 
-      {/* tiny keyframes for the animation */}
       <style>{`
         @keyframes mobileSheet {
           from { transform: translateY(-8px); opacity: .0; }

@@ -75,7 +75,6 @@ export default function VenueManagerToggle({ name, isManager, onUpdated }) {
     <div className="mt-3 flex items-center gap-2">
       <span className="text-sm text-ocean">Venue manager</span>
 
-      {/* TRACK (div, not button) so global button styles don't interfere) */}
       <div
         role="switch"
         aria-checked={isManager}
