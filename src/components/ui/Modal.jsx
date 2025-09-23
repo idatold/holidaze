@@ -9,9 +9,9 @@ import { useEffect } from "react";
  * - title?: string | ReactNode
  * - children: ReactNode
  * - footer?: ReactNode
- * - className?: string          // extra classes on the panel
- * - panelClassName?: string     // height/overflow utilities for tall content
- * - backdropClassName?: string  // customize backdrop (e.g., "!bg-black/50" if you ever want dark)
+ * - className?: string
+ * - panelClassName?: string
+ * - backdropClassName?: string
  */
 export default function Modal({
   open,
@@ -23,6 +23,7 @@ export default function Modal({
   panelClassName = "",
   backdropClassName = "",
 }) {
+  
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") onClose?.();
@@ -31,6 +32,16 @@ export default function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // lock body scroll while open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
@@ -38,33 +49,33 @@ export default function Modal({
       className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
-      // clicking the light area outside closes
       onMouseDown={onClose}
     >
-      {/* Backdrop — default to hazy white with blur; override via backdropClassName if needed */}
+      {/* Backdrop — hazy white with blur (customizable) */}
       <div
         className={[
           "fixed inset-0",
-          "bg-white/70 backdrop-blur-md", // ❄️ light, hazy
+          "bg-white/70 backdrop-blur-md",
           backdropClassName,
         ].join(" ")}
         aria-hidden="true"
       />
 
-      {/* Centering wrapper. items-start on mobile so header is visible; center on sm+ */}
-      <div className="min-h-full flex items-start sm:items-center justify-center" onMouseDown={(e) => e.stopPropagation()}>
-        {/* Panel — no borders, deep shadow; internal scroll so tall content isn’t cut off */}
+      {/* Centering wrapper (clicks inside don't bubble to backdrop) */}
+      <div
+        className="min-h-full flex items-start sm:items-center justify-center"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div
           className={[
             "relative z-10 w-full max-w-lg sm:max-w-xl",
             "rounded-2xl bg-white shadow-2xl",
-            "my-4", // breathing room when scrolling
-            "max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overflow-y-auto", // internal scroll
+            "my-4",
+            "max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overflow-y-auto",
             className,
             panelClassName,
           ].join(" ")}
         >
-          {/* Header (no border) */}
           {(title || title === 0) && (
             <div className="flex items-center justify-between px-5 py-3">
               <h3 className="font-higuen text-ocean text-lg">{title}</h3>
@@ -78,10 +89,8 @@ export default function Modal({
             </div>
           )}
 
-          {/* Body */}
           <div className="px-5 py-4">{children}</div>
 
-          {/* Footer (no border) */}
           {footer && <div className="px-5 py-3">{footer}</div>}
         </div>
       </div>

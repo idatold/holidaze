@@ -8,7 +8,12 @@ import { useEffect, useState, useCallback } from "react";
  * - locLabel?: string  -> e.g. "Bodø, Norway"
  * - locIconSrc?: string -> e.g. pin icon
  */
-export default function Gallery({ images = [], title = "Image", locLabel, locIconSrc }) {
+export default function Gallery({
+  images = [],
+  title = "Image",
+  locLabel,
+  locIconSrc,
+}) {
   const [current, setCurrent] = useState(0);
   const [lightbox, setLightbox] = useState(false);
 
@@ -18,8 +23,12 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
     (e) => {
       if (!lightbox) return;
       if (e.key === "Escape") setLightbox(false);
-      if (e.key === "ArrowRight") setCurrent((i) => (hasImages ? (i + 1) % images.length : 0));
-      if (e.key === "ArrowLeft") setCurrent((i) => (hasImages ? (i - 1 + images.length) % images.length : 0));
+      if (e.key === "ArrowRight")
+        setCurrent((i) => (hasImages ? (i + 1) % images.length : 0));
+      if (e.key === "ArrowLeft")
+        setCurrent((i) =>
+          hasImages ? (i - 1 + images.length) % images.length : 0
+        );
     },
     [lightbox, hasImages, images.length]
   );
@@ -50,7 +59,14 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
         {/* Location badge overlay (non-interactive so click still opens lightbox) */}
         {locLabel && (
           <div className="pointer-events-none absolute top-2 left-2 z-10 rounded-[8px] bg-white/95 px-2 py-1 text-xs font-semibold flex items-center gap-1">
-            {locIconSrc && <img src={locIconSrc} alt="" className="h-4 w-4 inline-block" loading="lazy" />}
+            {locIconSrc && (
+              <img
+                src={locIconSrc}
+                alt=""
+                className="h-4 w-4 inline-block"
+                loading="lazy"
+              />
+            )}
             <span className="text-ink">{locLabel}</span>
           </div>
         )}
@@ -83,12 +99,20 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
               className={[
                 "relative h-16 w-24 flex-none rounded-[12px] p-[2px] transition border-2",
                 "focus:outline-none",
-                active ? "border-[#006492]" : "border-transparent hover:border-zinc-300/70",
+                active
+                  ? "border-[#006492]"
+                  : "border-transparent hover:border-zinc-300/70",
                 "focus-visible:border-[#006492]",
               ].join(" ")}
             >
               <span className="block h-full w-full overflow-hidden rounded-[10px]">
-                <img src={m.url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                <img
+                  src={m.url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
               </span>
             </button>
           );
@@ -119,12 +143,25 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
               {images.length > 1 && (
                 <>
                   <button
-                    onClick={() => setCurrent((i) => (i - 1 + images.length) % images.length)}
+                    onClick={() =>
+                      setCurrent((i) => (i - 1 + images.length) % images.length)
+                    }
                     className="absolute left-4 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-[#D23393] text-white shadow-lg hover:brightness-110 active:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                     aria-label="Previous image"
                   >
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                      <path d="M15 19l-7-7 7-7" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M15 19l-7-7 7-7"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
                   <button
@@ -132,8 +169,19 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
                     className="absolute right-4 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-[#D23393] text-white shadow-lg hover:brightness-110 active:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                     aria-label="Next image"
                   >
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                      <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M9 5l7 7-7 7"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
                 </>
@@ -146,7 +194,14 @@ export default function Gallery({ images = [], title = "Image", locLabel, locIco
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-                  <path d="M6 6l12 12M6 18L18 6" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M6 6l12 12M6 18L18 6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.25"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             </div>

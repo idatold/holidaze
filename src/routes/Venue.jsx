@@ -153,7 +153,7 @@ export default function Venue() {
         )}
       </div>
 
-      {/* Owner chip */}
+      {/* Owner chip (non-clickable) */}
       <div className="mx-auto w-full max-w-2xl md:max-w-3xl lg:max-w-4xl">
         {loading ? (
           <div className="mt-3 inline-flex items-center gap-3">
@@ -161,7 +161,7 @@ export default function Venue() {
             <div className="h-4 w-36 rounded bg-zinc-100 animate-pulse" />
           </div>
         ) : (
-          venue?.owner && <OwnerChip owner={venue.owner} />
+          venue?.owner && <OwnerChip owner={venue.owner} linkBase="" />
         )}
       </div>
 

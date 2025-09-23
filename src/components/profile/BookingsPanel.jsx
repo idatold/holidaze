@@ -55,6 +55,7 @@ function EmptyState({ text }) {
   );
 }
 
+/* Reusable one-card-at-a-time carousel */
 function CardCarousel({ items, renderItem }) {
   const [index, setIndex] = useState(0);
   const viewportWidths = "w-[240px] sm:w-[260px] md:w-[280px]";
@@ -143,8 +144,8 @@ function CardCarousel({ items, renderItem }) {
 }
 
 export default function BookingsPanel({ profileName }) {
-  const token = getAccessToken?.();
-  const fromAuth = getStoredName?.();
+  const token = getAccessToken();   // ❗ direct call (no optional chaining)
+  const fromAuth = getStoredName(); // ❗ direct call (no optional chaining)
   const name = profileName || fromAuth;
 
   const [rows, setRows] = useState([]);

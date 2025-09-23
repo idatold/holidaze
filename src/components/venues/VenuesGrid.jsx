@@ -13,8 +13,15 @@ function toISODate(d) {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+// ranges are YYYY-MM-DD strings, inclusive on both ends
 function rangesOverlap(aFrom, aTo, bFrom, bTo) {
   return !(aTo < bFrom || aFrom > bTo);
+}
+function dayBefore(iso) {
+  if (!iso) return iso;
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 async function mapWithLimit(items, limit, mapper) {
   const out = new Array(items.length);
@@ -61,6 +68,11 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
 
   async function enrichAndFilter(list) {
     if (!haveRange || !list?.length) return list || [];
+
+    // normalize requested range to exclusive checkout (end becomes previous day)
+    const reqFrom = normFrom;
+    const reqToIncl = dayBefore(normTo);
+
     const detailed = await mapWithLimit(
       list,
       4,
@@ -73,12 +85,15 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
         }
       }
     );
+
     return detailed.filter((v) => {
       const bookings = v?.bookings || [];
       for (const b of bookings) {
         const bFrom = (b?.dateFrom || "").slice(0, 10);
-        const bTo = (b?.dateTo || "").slice(0, 10);
-        if (bFrom && bTo && rangesOverlap(normFrom, normTo, bFrom, bTo)) {
+        const bToIncl = dayBefore((b?.dateTo || "").slice(0, 10));
+        // if either end missing, skip that booking record
+        if (!bFrom || !bToIncl) continue;
+        if (rangesOverlap(reqFrom, reqToIncl, bFrom, bToIncl)) {
           return false;
         }
       }

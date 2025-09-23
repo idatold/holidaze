@@ -4,11 +4,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const PinkInput = forwardRef(function PinkInput(
-  { value, onClick, placeholder, className, onChange },
+  { value, onClick, placeholder, className, onChange, readOnly = true },
   ref
 ) {
   return (
-    // make the container full width so absolute icon aligns correctly
     <div className="relative w-full">
       <input
         ref={ref}
@@ -17,6 +16,7 @@ const PinkInput = forwardRef(function PinkInput(
         onClick={onClick}
         placeholder={placeholder}
         className={`input-hero control-12 w-full pr-10 ${className || ""}`}
+        readOnly={readOnly}
       />
       <button
         type="button"
@@ -24,7 +24,7 @@ const PinkInput = forwardRef(function PinkInput(
         aria-label="Open calendar"
         className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#D23393] rounded-[5px] focus:outline-none"
       >
-        <svg viewBox="0 0 24 24" className="h-5 w-5">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
           <path
             d="M7 2v3M17 2v3M3 9h18"
             stroke="currentColor"
@@ -70,17 +70,18 @@ export default function BrandDatePicker({
         id={id}
         selected={selected}
         onChange={onChange}
+        onChangeRaw={(e) => e.preventDefault()} // block manual typing
         dateFormat="dd/MM/yyyy"
         placeholderText={placeholder}
         wrapperClassName="w-full"
-        customInput={<PinkInput className="w-full" />}
+        customInput={<PinkInput className="w-full" readOnly />}
         calendarClassName="hz-datepicker"
         popperClassName="hz-popper"
         popperPlacement="bottom-start"
         shouldCloseOnSelect
-        /* Portal so it never gets clipped by hero overflow */
         popperContainer={({ children }) =>
-          createPortal(children, document.body)
+          // SSR-safe portal
+          typeof document === "undefined" ? null : createPortal(children, document.body)
         }
       />
     </div>
