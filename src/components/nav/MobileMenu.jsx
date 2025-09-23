@@ -142,19 +142,13 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
 
         {/* Links */}
         <nav className="mt-3">
-          <button
-            type="button"
-            onClick={() => goto("/")}
-            className="block w-full text-left px-1 py-2 nav-link !no-underline"
-          >
-            Home
-          </button>
+          {/* Home removed; logo navigates home */}
           <button
             type="button"
             onClick={() => goto("/venues")}
             className="block w-full text-left px-1 py-2 nav-link !no-underline"
           >
-            Venues
+            Browse Venues
           </button>
 
           <div className="my-3 h-px bg-[#e6dad3]" />

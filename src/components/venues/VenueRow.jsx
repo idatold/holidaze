@@ -3,19 +3,41 @@ import { Link } from "react-router-dom";
 /* tiny inline icons (same look as before) */
 function PencilIcon({ className = "h-5 w-5" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" stroke="currentColor" strokeWidth="1.5" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
       <path d="M14.06 4.19l3.75 3.75" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
 function TrashIcon({ className = "h-5 w-5" }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
       <path d="M4 7h16" stroke="currentColor" strokeWidth="1.5" />
       <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
@@ -33,7 +55,10 @@ function toNumber(v) {
 }
 function nok(n) {
   try {
-    return new Intl.NumberFormat("nb-NO", { style: "currency", currency: "NOK" }).format(n ?? 0);
+    return new Intl.NumberFormat("nb-NO", {
+      style: "currency",
+      currency: "NOK",
+    }).format(n ?? 0);
   } catch {
     return `${n} NOK`;
   }
@@ -58,7 +83,10 @@ export default function VenueRow({ venue, onEdit, onDelete }) {
       {/* stack on mobile; row from sm+ */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         {/* image */}
-        <Link to={`/venue/${venue?.id || ""}`} className="shrink-0 w-full sm:w-auto">
+        <Link
+          to={`/venue/${venue?.id || ""}`}
+          className="shrink-0 w-full sm:w-auto"
+        >
           <div
             className={[
               "h-40 w-full sm:h-20 sm:w-28 rounded-lg overflow-hidden bg-foam shadow-sm",
@@ -98,11 +126,37 @@ export default function VenueRow({ venue, onEdit, onDelete }) {
           {/* amenities */}
           <div className="mt-2 flex flex-wrap items-center gap-3">
             {venue?.meta?.breakfast && (
-              <img src={breakfastIcon} alt="Breakfast" className="h-5 w-5" loading="lazy" />
+              <img
+                src={breakfastIcon}
+                alt="Breakfast"
+                className="h-5 w-5"
+                loading="lazy"
+              />
             )}
-            {venue?.meta?.pets && <img src={petsIcon} alt="Pets allowed" className="h-5 w-5" loading="lazy" />}
-            {venue?.meta?.parking && <img src={parkingIcon} alt="Parking" className="h-5 w-5" loading="lazy" />}
-            {venue?.meta?.wifi && <img src={wifiIcon} alt="Wi-Fi" className="h-5 w-5" loading="lazy" />}
+            {venue?.meta?.pets && (
+              <img
+                src={petsIcon}
+                alt="Pets allowed"
+                className="h-5 w-5"
+                loading="lazy"
+              />
+            )}
+            {venue?.meta?.parking && (
+              <img
+                src={parkingIcon}
+                alt="Parking"
+                className="h-5 w-5"
+                loading="lazy"
+              />
+            )}
+            {venue?.meta?.wifi && (
+              <img
+                src={wifiIcon}
+                alt="Wi-Fi"
+                className="h-5 w-5"
+                loading="lazy"
+              />
+            )}
           </div>
         </div>
 
