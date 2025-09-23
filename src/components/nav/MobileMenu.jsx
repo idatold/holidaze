@@ -77,7 +77,11 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       >
         {/* Header row */}
         <div className="flex items-end justify-between">
-          <Link to="/" onClick={() => goto("/")} className="flex items-end gap-2">
+          <Link
+            to="/"
+            onClick={() => goto("/")}
+            className="flex items-end gap-2"
+          >
             <img src={logo} alt="Holidaze" className="h-[40px] w-auto" />
           </Link>
           <button
@@ -87,7 +91,13 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
             onClick={onClose}
             className="rounded-[5px] p-2 hover:shadow-sm active:scale-[0.98] focus:outline-none"
           >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="#006492" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="#006492"
+              aria-hidden="true"
+            >
               <path d="M6.4 5l12.6 12.6-1.4 1.4L5 6.4 6.4 5z" />
               <path d="M18.6 5L5.9 17.6l1.4 1.4L20 6.4 18.6 5z" />
             </svg>
@@ -111,11 +121,15 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-[#79BAEC] text-white grid place-items-center ring-1 ring-black/5">
-                  <span className="text-sm font-bold">{name.slice(0, 2).toUpperCase()}</span>
+                  <span className="text-sm font-bold">
+                    {name.slice(0, 2).toUpperCase()}
+                  </span>
                 </div>
               )}
               <div>
-                <div className="text-sm font-semibold text-[#006492]">{name}</div>
+                <div className="text-sm font-semibold text-[#006492]">
+                  {name}
+                </div>
                 <div className="text-[11px] text-gray-500">{email}</div>
               </div>
             </div>

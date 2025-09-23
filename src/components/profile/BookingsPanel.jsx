@@ -12,10 +12,16 @@ const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
 
 /* utils */
-function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
 function fmt(d) {
   return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit", month: "short", year: "numeric",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   }).format(new Date(d));
 }
 
@@ -97,7 +103,9 @@ function CardCarousel({ items, renderItem }) {
                 text-ocean hover:scale-105 active:scale-95 focus:outline-none
               "
             >
-              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">‹</span>
+              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">
+                ‹
+              </span>
             </button>
             <button
               type="button"
@@ -110,7 +118,9 @@ function CardCarousel({ items, renderItem }) {
                 text-ocean hover:scale-105 active:scale-95 focus:outline-none
               "
             >
-              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">›</span>
+              <span className="block text-5xl sm:text-6xl leading-none -mt-2 select-none">
+                ›
+              </span>
             </button>
           </>
         )}
@@ -148,25 +158,40 @@ export default function BookingsPanel({ profileName }) {
 
   useEffect(() => {
     let alive = true;
-    if (!token || !name) { setLoading(false); return; }
+    if (!token || !name) {
+      setLoading(false);
+      return;
+    }
 
     (async () => {
       try {
         setLoading(true);
         const { data } = await api.get(
           h(`/profiles/${encodeURIComponent(name)}/bookings`),
-          { params: { _venue: true, sort: "dateFrom", sortOrder: "asc", limit: 100 } }
+          {
+            params: {
+              _venue: true,
+              sort: "dateFrom",
+              sortOrder: "asc",
+              limit: 100,
+            },
+          }
         );
         if (!alive) return;
         setRows(Array.isArray(data?.data) ? data.data : []);
       } catch (e) {
-        if (alive) toast.error(e?.response?.data?.message || e?.message || "Couldn’t load bookings");
+        if (alive)
+          toast.error(
+            e?.response?.data?.message || e?.message || "Couldn’t load bookings"
+          );
       } finally {
         if (alive) setLoading(false);
       }
     })();
 
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [name, token]);
 
   const today = useMemo(() => startOfDay(new Date()), []);
