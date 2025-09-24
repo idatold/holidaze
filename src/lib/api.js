@@ -1,4 +1,6 @@
+// src/lib/api.js
 import axios from "axios";
+import attachGlobalLoading from "@/lib/attachGlobalLoading"; // ⬅️ added
 
 // ✅ Default to Noroff v2 unless overridden in .env
 export const API_BASE = (
@@ -25,7 +27,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-
+// ⬇️ global loading overlay
+attachGlobalLoading(api);
 
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
@@ -35,7 +38,7 @@ const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
  * Always starts with a leading slash so axios joins correctly.
  */
 function hPath(path) {
-  return `${HOLIDAZE_PREFIX}${path}`; 
+  return `${HOLIDAZE_PREFIX}${path}`;
 }
 
 /**

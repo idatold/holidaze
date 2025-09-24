@@ -23,7 +23,6 @@ export default function Modal({
   panelClassName = "",
   backdropClassName = "",
 }) {
-  
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") onClose?.();
@@ -32,7 +31,6 @@ export default function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // lock body scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;

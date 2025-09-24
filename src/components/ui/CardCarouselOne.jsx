@@ -1,4 +1,3 @@
-// src/components/ui/CardCarouselOne.jsx
 import { useEffect, useState } from "react";
 
 /**

@@ -24,14 +24,13 @@ export default function BookingRow({
       data-deleting={deleting ? "true" : "false"}
       className={[
         "rounded-xl bg-white p-3 sm:p-4 shadow transition-all duration-200 border",
-        "[border-color:rgba(210,51,147,.20)]", // #D23393 @ 20%
+        "[border-color:rgba(210,51,147,.20)]",
         faded ? "opacity-90" : "",
-        // exit animation on cancel
+
         "data-[deleting=true]:opacity-0 data-[deleting=true]:scale-[0.98] data-[deleting=true]:-translate-y-0.5",
       ].join(" ")}
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        {/* image */}
         <Link
           to={`/venue/${v?.id || ""}`}
           className="shrink-0 w-full sm:w-auto"

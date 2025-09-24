@@ -13,6 +13,7 @@ import NotFound from "@/routes/Auth/NotFound.jsx";
 import MyVenues from "@/routes/MyVenues";
 
 import ScrollToTop from "@/utils/ScrollToTop.jsx";
+import LoadingOverlay from "@/components/ui/LoadingOverlay.jsx";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,6 +21,9 @@ import "react-toastify/dist/ReactToastify.css";
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Global loading overlay (covers entire app when uiStore.loadingGlobal is true) */}
+      <LoadingOverlay />
+
       <ScrollToTop />
       {/* ensures new routes start at top */}
 
@@ -43,10 +47,10 @@ export default function App() {
       />
 
       <Routes>
-        
+        {/* Home: NO layout */}
         <Route index element={<Home />} />
 
-        
+        {/* Gradient + padded pages */}
         <Route element={<DefaultLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
@@ -58,7 +62,7 @@ export default function App() {
               </RequireAuth>
             }
           />
-        
+          {/* Protected bookings route */}
           <Route
             path="bookings"
             element={
@@ -67,7 +71,7 @@ export default function App() {
               </RequireAuth>
             }
           />
-        
+          {/* Protected my-venues route */}
           <Route
             path="my-venues"
             element={
@@ -78,15 +82,15 @@ export default function App() {
           />
         </Route>
 
-     
+        {/* Full-bleed pages */}
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
-         
+          {/* keep compatibility with /venue/:id links */}
           <Route path="venue/:id" element={<Venue />} />
         </Route>
 
-    
+        {/* 404 fallback (keeps navbar/footer via DefaultLayout) */}
         <Route element={<DefaultLayout />}>
           <Route path="*" element={<NotFound />} />
         </Route>

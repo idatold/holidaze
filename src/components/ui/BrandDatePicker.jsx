@@ -70,7 +70,7 @@ export default function BrandDatePicker({
         id={id}
         selected={selected}
         onChange={onChange}
-        onChangeRaw={(e) => e.preventDefault()} // block manual typing
+        onChangeRaw={(e) => e.preventDefault()}
         dateFormat="dd/MM/yyyy"
         placeholderText={placeholder}
         wrapperClassName="w-full"
@@ -81,7 +81,9 @@ export default function BrandDatePicker({
         shouldCloseOnSelect
         popperContainer={({ children }) =>
           // SSR-safe portal
-          typeof document === "undefined" ? null : createPortal(children, document.body)
+          typeof document === "undefined"
+            ? null
+            : createPortal(children, document.body)
         }
       />
     </div>
