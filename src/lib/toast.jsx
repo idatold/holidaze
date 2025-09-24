@@ -5,16 +5,14 @@ import { toast as rt, Zoom } from "react-toastify";
 const baseOpts = {
   theme: "light",
   pauseOnHover: true,
-  transition: Zoom,   
-  autoClose: 3200,    
-  draggable: false,   
+  transition: Zoom,
+  autoClose: 3200,
+  draggable: false,
 };
 
 /* ─────────────────────────  Shared classes  ───────────────────────── */
 const bodyClass = "font-arsenal text-ink";
-
 const boxClass  = "rounded-[12px] bg-white shadow-lg " + bodyClass;
-
 /* explicit brand frame (tailwind-only) */
 const boxPink   = boxClass + " border-2 border-pink";
 
@@ -22,38 +20,40 @@ const boxPink   = boxClass + " border-2 border-pink";
 const btnOutlinePink = "btn btn-outline-pink uppercase";
 const btnPink        = "btn btn-pink uppercase";
 
-/* ─────────────────────────  Icon for Toastify icon slot  ─────────────────────────
-   Self-colored SVG: pink filled circle + white check (no reliance on currentColor).
-*/
-function SvgPinkCheck({ className = "h-5 w-5 shrink-0" }) {
-  return (
-    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" focusable="false">
-      {/* hard-fill to brand pink so it cannot turn black */}
-      <circle cx="10" cy="10" r="10" fill="#D23393" />
-      <path
-        d="M5.5 10.5l2.5 2.5 6-6"
-        stroke="#FFFFFF"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+/* Icon element (NOT a component) to avoid Fast Refresh warning */
+const pinkCheckIconEl = (
+  <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" aria-hidden="true" focusable="false">
+    <circle cx="10" cy="10" r="10" fill="#D23393" />
+    <path
+      d="M5.5 10.5l2.5 2.5 6-6"
+      stroke="#FFFFFF"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
-/* Convenience: brand notification defaults (success/error/info) */
+/* ─────────────────────────  Brand toast helpers  ───────────────────────── */
 const brandNotify = (fn, message, opts = {}) =>
   fn(message, {
     ...baseOpts,
     position: "bottom-right",
     className: boxPink + " toast-brand",       // pink frame
     bodyClassName: "flex items-center gap-2",  // alignment + spacing
-    icon: <SvgPinkCheck />,                    // use Toastify icon slot (kept)
+    icon: pinkCheckIconEl,                     // element, not component
     progressClassName: "toast-progress-pink",  // bold pink bar (CSS in index.css)
+    // fit-content-ish card
+    style: {
+      maxWidth: "min(92vw, 520px)",
+      width: "auto",
+      alignSelf: "center",
+    },
+    closeOnClick: true,
     ...opts,
   });
 
-/* ─────────────────────────  Bottom-right toasts  ───────────────────────── */
+/* Bottom-right toasts */
 function success(message, opts) {
   return brandNotify(rt.success, message, opts);
 }
@@ -64,24 +64,27 @@ function info(message, opts) {
   return brandNotify(rt, message, opts);
 }
 
-/* Mini, subtle success that still uses the icon slot */
+/* Mini success */
 function miniSuccess(message, opts) {
   return rt.success(message, {
     ...baseOpts,
     position: "bottom-right",
     className: boxPink + " toast-brand toast-mini",
     bodyClassName: "flex items-center gap-2",
-    icon: <SvgPinkCheck />,            // pink circle here too
+    icon: pinkCheckIconEl,
     hideProgressBar: true,
-    autoClose: 2200,                   // slightly longer than before
+    autoClose: 2200,
     closeOnClick: true,
+    style: {
+      maxWidth: "min(92vw, 440px)",
+      width: "auto",
+      alignSelf: "center",
+    },
     ...opts,
   });
 }
 
-/* ─────────────────────────  Centered confirm  ─────────────────────────
-   Clean confirm (no icon in the corner).
-*/
+/* Centered confirm */
 function confirm({
   title = "Are you sure?",
   message = "",
@@ -137,12 +140,17 @@ function confirm({
       closeOnClick: false,
       className: boxPink + " toast-brand",
       bodyClassName: "flex flex-col",
+      style: {
+        maxWidth: "min(92vw, 520px)",
+        width: "auto",
+        alignSelf: "center",
+      },
       // no icon here
     }
   );
   return id;
 }
 
-/* ─────────────────────────  Public API  ───────────────────────── */
+/* Public API */
 const toast = { success, error, info, miniSuccess, confirm };
 export default toast;
