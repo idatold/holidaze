@@ -1,3 +1,4 @@
+// src/components/venues/VenuesGrid.jsx
 import { useEffect, useMemo, useState } from "react";
 import toast from "@/lib/toast";
 import { listVenues, searchVenues, getVenue } from "@/lib/api";
@@ -7,13 +8,12 @@ const PAGE_SIZE = 12;
 
 /* ───────── helpers ───────── */
 function toISODate(d) {
-  if (!(d instanceof Date) || isNaN(d)) return null;
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  if (!d) return null;
+  if (d instanceof Date && !isNaN(d)) return d.toISOString().slice(0, 10);
+  if (typeof d === "string") return d.slice(0, 10);
+  return null;
 }
-// ranges are YYYY-MM-DD strings, inclusive on both ends
+// inclusive on both ends for string YYYY-MM-DD comparisons
 function rangesOverlap(aFrom, aTo, bFrom, bTo) {
   return !(aTo < bFrom || aFrom > bTo);
 }
@@ -21,15 +21,19 @@ function dayBefore(iso) {
   if (!iso) return iso;
   const d = new Date(`${iso}T00:00:00`);
   d.setDate(d.getDate() - 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 }
 async function mapWithLimit(items, limit, mapper) {
   const out = new Array(items.length);
-  let i = 0, active = 0;
+  let i = 0,
+    active = 0;
   return await new Promise((resolve, reject) => {
     const pump = () => {
       while (active < limit && i < items.length) {
-        const idx = i++; active++;
+        const idx = i++;
+        active++;
         Promise.resolve(mapper(items[idx], idx))
           .then((res) => (out[idx] = res))
           .catch(reject)
@@ -43,8 +47,9 @@ async function mapWithLimit(items, limit, mapper) {
     pump();
   });
 }
-/* ───────── component ───────── */
+const hasBookings = (v) => Array.isArray(v?.bookings);
 
+/* ───────── component ───────── */
 export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
   const isSearching = useMemo(() => q.trim().length > 0, [q]);
   const [items, setItems] = useState([]);
@@ -60,38 +65,48 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
   const normTo = useMemo(() => toISODate(dateTo), [dateTo]);
 
   async function fetchBasePage(page = 1) {
-    const args = { page, limit: PAGE_SIZE, sort: "created", sortOrder: "desc" };
-    return isSearching
-      ? await searchVenues(q.trim(), args)
-      : await listVenues(args);
+    const args = {
+      page,
+      limit: PAGE_SIZE,
+      sort: "created",
+      sortOrder: "desc",
+      // Hint the API to include bookings when we actually need them.
+      // Your api.js should translate this to `_bookings=true`.
+      includeBookings: haveRange,
+    };
+    return isSearching ? await searchVenues(q.trim(), args) : await listVenues(args);
   }
 
   async function enrichAndFilter(list) {
-    if (!haveRange || !list?.length) return list || [];
+    if (!list?.length) return [];
+
+    // If API already included bookings for us, no N+1 needed.
+    const input = haveRange && !hasBookings(list[0])
+      ? await mapWithLimit(
+          list,
+          4,
+          async (v) => {
+            try {
+              const full = await getVenue(v.id, { includeBookings: true });
+              return full?.data || v;
+            } catch {
+              return v; // fail-soft
+            }
+          }
+        )
+      : list;
+
+    if (!haveRange) return input;
 
     // normalize requested range to exclusive checkout (end becomes previous day)
     const reqFrom = normFrom;
     const reqToIncl = dayBefore(normTo);
 
-    const detailed = await mapWithLimit(
-      list,
-      4,
-      async (v) => {
-        try {
-          const full = await getVenue(v.id, { includeBookings: true });
-          return full?.data || v;
-        } catch {
-          return v; // fail-soft
-        }
-      }
-    );
-
-    return detailed.filter((v) => {
-      const bookings = v?.bookings || [];
+    return input.filter((v) => {
+      const bookings = Array.isArray(v?.bookings) ? v.bookings : [];
       for (const b of bookings) {
         const bFrom = (b?.dateFrom || "").slice(0, 10);
         const bToIncl = dayBefore((b?.dateTo || "").slice(0, 10));
-        // if either end missing, skip that booking record
         if (!bFrom || !bToIncl) continue;
         if (rangesOverlap(reqFrom, reqToIncl, bFrom, bToIncl)) {
           return false;
@@ -111,16 +126,20 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
       let page = 1;
       let acc = [];
       let metaLocal = null;
+      const seen = new Set();
 
-      // Loop until we have at least PAGE_SIZE available (or no more pages)
       while (true) {
         const { data, meta } = await fetchBasePage(page);
         metaLocal = meta || null;
 
         const filtered = await enrichAndFilter(data || []);
-        acc = acc.concat(filtered);
+        for (const v of filtered) {
+          if (!seen.has(v.id)) {
+            acc.push(v);
+            seen.add(v.id);
+          }
+        }
 
-        // stop if we have enough items, no dates set, or no next page
         const haveEnough = haveRange ? acc.length >= PAGE_SIZE : true;
         const hasNext = !!meta?.nextPage;
 
@@ -144,7 +163,12 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
       setLoadingMore(true);
       const { data, meta: newMeta } = await fetchBasePage(meta.nextPage);
       const filtered = await enrichAndFilter(data || []);
-      setItems((prev) => [...prev, ...filtered]);
+      // dedupe on append
+      setItems((prev) => {
+        const seen = new Set(prev.map((p) => p.id));
+        const add = filtered.filter((v) => !seen.has(v.id));
+        return [...prev, ...add];
+      });
       setMeta(newMeta || null);
     } catch (e) {
       toast.error(e?.message || "Couldn’t load more venues");
@@ -162,9 +186,12 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
 
   if (loading && items.length === 0) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-          <div key={i} className="h-72 rounded-[5px] bg-zinc-100 border border-zinc-200 animate-pulse" />
+          <div
+            key={i}
+            className="h-72 animate-pulse rounded-[5px] border border-zinc-200 bg-zinc-100"
+          />
         ))}
       </div>
     );
@@ -180,7 +207,7 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((v) => (
           <VenueCard key={v.id} venue={v} />
         ))}

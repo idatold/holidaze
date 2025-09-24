@@ -1,3 +1,4 @@
+// src/routes/Auth/Register.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "@/lib/authApi";
@@ -49,35 +50,41 @@ export default function Register() {
       <div className="card-sand mx-auto w-[420px] max-w-full">
         <h1 className="font-higuen text-center text-ocean text-xl mb-5">Register</h1>
 
-        <form onSubmit={onSubmit} className="space-y-3">
+        <form onSubmit={onSubmit} className="space-y-3" autoComplete="on">
           <div>
-            <label className="block mb-1 text-sm text-ocean">Name</label>
+            <label htmlFor="name" className="block mb-1 text-sm text-ocean">Name</label>
             <input
+              id="name"
+              name="profileName"
               className="input-auth w-full border-none bg-white"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="your_username"
+              autoComplete="nickname"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block mb-1 text-sm text-ocean">Email</label>
+            <input
+              id="email"
+              name="email"
+              className="input-auth w-full border-none bg-white"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="first.last@stud.noroff.no"
               autoComplete="username"
               required
             />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm text-ocean">Email</label>
+            <label htmlFor="password" className="block mb-1 text-sm text-ocean">Password</label>
             <input
-              className="input-auth w-full border-none bg-white"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="first.last@stud.noroff.no"
-              autoComplete="email"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 text-sm text-ocean">Password</label>
-            <input
+              id="password"
+              name="password"
               className="input-auth w-full border-none bg-white"
               type="password"
               value={password}

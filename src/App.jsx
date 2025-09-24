@@ -38,14 +38,15 @@ export default function App() {
         position="top-center"
         theme="light"
         closeButton={false}
+        limit={3}
         className="!fixed !top-1/2 !left-1/2 !-translate-x-1/2 !-translate-y-1/2 !p-0"
       />
 
       <Routes>
-        {/* Home: NO layout */}
+        
         <Route index element={<Home />} />
 
-        {/* Gradient + padded pages */}
+        
         <Route element={<DefaultLayout />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
@@ -57,7 +58,7 @@ export default function App() {
               </RequireAuth>
             }
           />
-          {/* ✅ Protected bookings route (moved to /bookings) */}
+        
           <Route
             path="bookings"
             element={
@@ -66,7 +67,7 @@ export default function App() {
               </RequireAuth>
             }
           />
-          {/* ✅ Protected my-venues route */}
+        
           <Route
             path="my-venues"
             element={
@@ -77,15 +78,15 @@ export default function App() {
           />
         </Route>
 
-        {/* Full-bleed pages */}
+     
         <Route element={<PlainLayout />}>
           <Route path="venues" element={<Venues />} />
           <Route path="venues/:id" element={<Venue />} />
-          {/* keep compatibility with /venue/:id links */}
+         
           <Route path="venue/:id" element={<Venue />} />
         </Route>
 
-        {/* 404 fallback (keeps navbar/footer via DefaultLayout) */}
+    
         <Route element={<DefaultLayout />}>
           <Route path="*" element={<NotFound />} />
         </Route>

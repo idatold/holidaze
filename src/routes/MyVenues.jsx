@@ -36,7 +36,6 @@ export default function MyVenues() {
   useEffect(() => {
     let alive = true;
 
-    // Soft guard: this route is protected by RequireAuth, but keep a friendly message
     if (!token || !name) {
       setLoading(false);
       toast.error("Please log in to manage your venues.");
