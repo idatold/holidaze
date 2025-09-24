@@ -50,7 +50,13 @@ async function mapWithLimit(items, limit, mapper) {
 const hasBookings = (v) => Array.isArray(v?.bookings);
 
 /* ───────── component ───────── */
-export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
+export default function VenuesGrid({
+  q = "",
+  dateFrom = null,
+  dateTo = null,
+  sort = "created",    // ⬅️ NEW (from parent)
+  sortOrder = "desc",  // ⬅️ NEW (from parent)
+}) {
   const isSearching = useMemo(() => q.trim().length > 0, [q]);
   const [items, setItems] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -68,8 +74,8 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
     const args = {
       page,
       limit: PAGE_SIZE,
-      sort: "created",
-      sortOrder: "desc",
+      sort,
+      sortOrder,
       // Hint the API to include bookings when we actually need them.
       // Your api.js should translate this to `_bookings=true`.
       includeBookings: haveRange,
@@ -81,20 +87,17 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
     if (!list?.length) return [];
 
     // If API already included bookings for us, no N+1 needed.
-    const input = haveRange && !hasBookings(list[0])
-      ? await mapWithLimit(
-          list,
-          4,
-          async (v) => {
+    const input =
+      haveRange && !hasBookings(list[0])
+        ? await mapWithLimit(list, 4, async (v) => {
             try {
               const full = await getVenue(v.id, { includeBookings: true });
               return full?.data || v;
             } catch {
               return v; // fail-soft
             }
-          }
-        )
-      : list;
+          })
+        : list;
 
     if (!haveRange) return input;
 
@@ -180,7 +183,7 @@ export default function VenuesGrid({ q = "", dateFrom = null, dateTo = null }) {
   useEffect(() => {
     fetchInitial();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSearching, q, normFrom, normTo]);
+  }, [isSearching, q, normFrom, normTo, sort, sortOrder]);
 
   const canLoadMore = !!meta?.nextPage;
 
