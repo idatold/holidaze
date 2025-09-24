@@ -1,4 +1,3 @@
-// src/components/profile/VenuesCarouselPanel.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
@@ -7,12 +6,10 @@ import toast from "@/lib/toast";
 import VenueCard from "@/components/venues/VenueCard";
 import CardCarouselOne from "@/components/ui/CardCarouselOne";
 
-/* holidaze prefix helper (same as elsewhere) */
 const baseEndsWithHolidaze = /\/holidaze\/?$/.test(API_BASE);
 const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
 
-/* tiny UI helpers to match BookingsPanel look */
 function SectionTitleLink({ children, to }) {
   return (
     <Link
@@ -44,13 +41,14 @@ function EmptyState({ text, cta = null }) {
   );
 }
 
-/* Wrapper (no hooks here) */
-export default function VenuesCarouselPanel({ profileName, isManager = false }) {
+export default function VenuesCarouselPanel({
+  profileName,
+  isManager = false,
+}) {
   if (!isManager) return null;
   return <VenuesCarouselPanelInner profileName={profileName} />;
 }
 
-/* All hooks live here */
 function VenuesCarouselPanelInner({ profileName }) {
   const token = getAccessToken();
   const fromAuth = getStoredName();
@@ -103,7 +101,10 @@ function VenuesCarouselPanelInner({ profileName }) {
       ) : rows.length ? (
         <>
           <SubTitle>Latest spaces</SubTitle>
-          <CardCarouselOne items={rows} renderItem={(v) => <VenueCard venue={v} />} />
+          <CardCarouselOne
+            items={rows}
+            renderItem={(v) => <VenueCard venue={v} />}
+          />
         </>
       ) : (
         <EmptyState

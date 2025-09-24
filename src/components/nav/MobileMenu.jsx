@@ -78,7 +78,7 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
-      onMouseDown={onClose} // backdrop closes on mousedown
+      onMouseDown={onClose}
     >
       <div className="absolute inset-0 bg-black/40" />
 
@@ -90,7 +90,6 @@ export default function MobileMenu({ isLoggedIn, onClose }) {
       >
         {/* Header row */}
         <div className="flex items-end justify-between">
-          {/* Use Link navigation; just close the sheet on click */}
           <Link to="/" onClick={onClose} className="flex items-end gap-2">
             <img src={logo} alt="Holidaze" className="h-[40px] w-auto" />
           </Link>

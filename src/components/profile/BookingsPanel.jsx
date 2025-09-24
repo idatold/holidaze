@@ -144,8 +144,8 @@ function CardCarousel({ items, renderItem }) {
 }
 
 export default function BookingsPanel({ profileName }) {
-  const token = getAccessToken();   // ❗ direct call (no optional chaining)
-  const fromAuth = getStoredName(); // ❗ direct call (no optional chaining)
+  const token = getAccessToken();
+  const fromAuth = getStoredName();
   const name = profileName || fromAuth;
 
   const [rows, setRows] = useState([]);
@@ -194,7 +194,7 @@ export default function BookingsPanel({ profileName }) {
     return rows
       .filter((b) => {
         const to = new Date(b?.dateTo);
-        return !isNaN(to) && startOfDay(to) >= today; // “checkout today” still upcoming
+        return !isNaN(to) && startOfDay(to) >= today;
       })
       .sort((a, b) => new Date(a.dateFrom) - new Date(b.dateFrom))
       .slice(0, 6);
@@ -206,7 +206,7 @@ export default function BookingsPanel({ profileName }) {
         const to = new Date(b?.dateTo);
         return !isNaN(to) && startOfDay(to) < today;
       })
-      .sort((a, b) => new Date(b.dateTo) - new Date(a.dateTo)) // most recent first
+      .sort((a, b) => new Date(b.dateTo) - new Date(a.dateTo))
       .slice(0, 6);
   }, [rows, today]);
 

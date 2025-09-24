@@ -41,6 +41,7 @@ A modern venue booking app built with **React + Vite**, styled with **Tailwind**
 ## 🖼️ Features in Detail
 
 ### Venues List
+
 - 🔎 Search by name/description
 - 📅 Date‐range availability filter (checkout is **exclusive**)
 - ↕️ Sorting: **Newest/Oldest** and **Price Low/High**
@@ -48,11 +49,13 @@ A modern venue booking app built with **React + Vite**, styled with **Tailwind**
 - 🧩 Venue cards show image, rating, price/night, amenities, guests
 
 ### Top Venues Carousel
+
 - ⭐ Shows **top 5** venues by rating (fallback popularity heuristic)
 - 🖥️ Displays **3 cards** at a time on desktop, shrinks nicely on mobile
 - ⬅️ ➡️ Keyboard/tap friendly arrows + dots
 
 ### Venue Page
+
 - 🖼️ Gallery with lightbox
 - ⭐ Rating, amenities, location chip, price
 - 👤 Owner chip (non-clickable here)
@@ -60,6 +63,7 @@ A modern venue booking app built with **React + Vite**, styled with **Tailwind**
 - 🗓️ Booking panel: disables booked days; min 1 night; requires login
 
 ### Profile
+
 - 🖼️ Edit avatar & banner (URL validation + preview)
 - 🔀 Venue manager toggle (confirm modal)
 - 🎠 Bookings panel: upcoming/past carousels with cancel
@@ -70,4 +74,4 @@ A modern venue booking app built with **React + Vite**, styled with **Tailwind**
 Thanks for checking out **Holidaze** — this was a super fun project to build!  
 Built with love, too many coffees, and a tiny sprinkle of chaos. 😄
 
-— *Ida*
+— _Ida_

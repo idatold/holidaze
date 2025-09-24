@@ -1,35 +1,74 @@
-// services/http.js
+// src/services/http.js
 import axios from "axios";
 import { getToken } from "./storage";
-
-const API_BASE = (import.meta.env.VITE_API_URL || "https://v2.api.noroff.dev").replace(/\/+$/, "");
-const N_KEY = import.meta.env.VITE_NOROFF_API_KEY;
+import { useUIStore } from "@/store/uiStore";
 
 export const http = axios.create({
-  baseURL: API_BASE,
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
+    "X-Noroff-API-Key": import.meta.env.VITE_NOROFF_API_KEY,
   },
   timeout: 15000,
 });
 
-// attach bearer + api key if present
+// attach bearer token if present
 http.interceptors.request.use((config) => {
   const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  if (N_KEY) config.headers["X-Noroff-API-Key"] = N_KEY;
   return config;
 });
 
-// normalize error messages app-wide (optional but nice)
+/* ───────── Global loading overlay (with a small delay to avoid flicker) ───────── */
+let active = 0;
+let delayTimer = null;
+
+function begin(config) {
+  // opt-out per request: http.get(url, { __skipGlobalLoading: true })
+  if (config?.__skipGlobalLoading) return;
+
+  active += 1;
+  // only schedule once
+  if (!delayTimer) {
+    delayTimer = setTimeout(() => {
+      delayTimer = null;
+      useUIStore.getState().startLoading();
+    }, 200); // 200ms threshold
+  }
+}
+
+function end(config) {
+  if (config?.__skipGlobalLoading) return;
+
+  active = Math.max(0, active - 1);
+  if (active === 0) {
+    // if we never showed it (fast request), cancel the timer
+    if (delayTimer) {
+      clearTimeout(delayTimer);
+      delayTimer = null;
+    }
+    useUIStore.getState().stopLoading();
+  }
+}
+
+http.interceptors.request.use(
+  (config) => {
+    begin(config);
+    return config;
+  },
+  (error) => {
+    end(error?.config);
+    return Promise.reject(error);
+  }
+);
+
 http.interceptors.response.use(
-  (r) => r,
-  (err) => {
-    const status = err?.response?.status;
-    err.message =
-      err?.response?.data?.errors?.[0]?.message ||
-      err?.response?.data?.message ||
-      (status ? `Request failed (${status})` : "Network error");
-    return Promise.reject(err);
+  (response) => {
+    end(response?.config);
+    return response;
+  },
+  (error) => {
+    end(error?.config);
+    return Promise.reject(error);
   }
 );

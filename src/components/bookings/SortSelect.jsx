@@ -1,9 +1,10 @@
 export default function SortSelect({ value, onChange, label = "Sort" }) {
-  // normalize legacy values so UI stays consistent
   const normValue =
-    value === "endAsc" ? "startAsc" :
-    value === "endDesc" ? "startDesc" :
-    value || "startAsc";
+    value === "endAsc"
+      ? "startAsc"
+      : value === "endDesc"
+      ? "startDesc"
+      : value || "startAsc";
 
   return (
     <label className="flex items-center gap-2 text-sm text-zinc-600">
