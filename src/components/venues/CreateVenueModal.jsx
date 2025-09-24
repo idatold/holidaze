@@ -1,3 +1,4 @@
+// src/components/venues/CreateVenueModal.jsx
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { createVenue, updateVenue } from "@/lib/venues";
@@ -10,12 +11,7 @@ import breakfastIcon from "@/assets/icons/breakfast-ocean.svg";
 import petsIcon from "@/assets/icons/pets-ocean.svg";
 
 /* soft, elevated input look */
-const INPUT_CLS = [
-  "input-auth",
-  "bg-white",
-  "ring-1 ring-black/5",
-  "shadow",
-].join(" ");
+const INPUT_CLS = ["input-auth", "bg-white", "ring-1 ring-black/5", "shadow"].join(" ");
 
 /**
  * Reusable modal for CREATE and EDIT.
@@ -43,6 +39,7 @@ export default function CreateVenueModal({
     description: "A lovely getaway far awayyy....",
     price: "100",
     images: "https://example.com/venue-image.jpg, https://example.com/another.jpg",
+    alt: "Cozy living room with ocean view",
     maxGuests: "2",
     rating: "5",
     address: "123. Sun st.",
@@ -57,6 +54,7 @@ export default function CreateVenueModal({
     description: "",
     price: "",
     mediaUrls: "",
+    mediaAlt: "",           // ⬅️ NEW: single alt text applied to all media
     maxGuests: "",
     rating: "",
     meta: { wifi: true, parking: true, breakfast: true, pets: true },
@@ -83,11 +81,17 @@ export default function CreateVenueModal({
         ? initial.media.map((m) => m?.url).filter(Boolean).join(", ")
         : initial?.media?.[0]?.url || "";
 
+      const firstAlt =
+        (Array.isArray(initial?.media) && initial.media.find((m) => m?.alt)?.alt) ||
+        initial?.media?.[0]?.alt ||
+        "";
+
       setForm({
         name: initial?.name ?? "",
         description: initial?.description ?? "",
         price: String(initial?.price ?? ""),
         mediaUrls,
+        mediaAlt: firstAlt, // ⬅️ hydrate from existing alt if present
         maxGuests: String(initial?.maxGuests ?? ""),
         rating: String(initial?.rating ?? ""),
         meta: {
@@ -112,6 +116,7 @@ export default function CreateVenueModal({
         description: "",
         price: "",
         mediaUrls: "",
+        mediaAlt: "", // ⬅️ reset
         maxGuests: "",
         rating: "",
         location: { address: "", zip: "", city: "", country: "", continent: "" },
@@ -145,6 +150,8 @@ export default function CreateVenueModal({
         .map((s) => s.trim())
         .filter((u) => /^https?:\/\//i.test(u));
 
+      const alt = (form.mediaAlt || "").trim();
+
       const payload = {
         name: form.name,
         description: form.description,
@@ -154,7 +161,7 @@ export default function CreateVenueModal({
         rating: Number(form.rating === "" ? 5 : form.rating),
         meta: { ...form.meta },
         location: { ...form.location },
-        media: urls.map((url) => ({ url, alt: "" })),
+        media: urls.map((url) => ({ url, alt })), // ⬅️ apply alt to each media item
         mediaUrl: urls[0] || "", // back-compat
       };
 
@@ -222,9 +229,7 @@ export default function CreateVenueModal({
 
         {/* PRICE + IMAGES* */}
         <div className="grid gap-3">
-          <label className="text-ocean text-sm font-semibold">
-            Price per night
-          </label>
+          <label className="text-ocean text-sm font-semibold">Price per night</label>
           <input
             type="number"
             min="0"
@@ -244,17 +249,22 @@ export default function CreateVenueModal({
             className={INPUT_CLS}
             placeholder={PH.images}
           />
-          <p className="text-[11px] text-gray-500">
-            *Optional, separate url`s with commas.
-          </p>
+          <p className="text-[11px] text-gray-500">*Optional, separate url`s with commas.</p>
+
+          {/* ⬇️ NEW: Alt text input just under the image URLs */}
+          <label className="text-ocean text-sm font-semibold">Alt text *optional</label>
+          <input
+            value={form.mediaAlt}
+            onChange={(e) => setField("mediaAlt", e.target.value)}
+            placeholder={PH.alt}
+            className={INPUT_CLS}
+          />
         </div>
 
         {/* MAX GUESTS + RATING */}
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
-            <label className="text-ocean text-sm font-semibold">
-              Max guests
-            </label>
+            <label className="text-ocean text-sm font-semibold">Max guests</label>
             <input
               type="number"
               min="1"
@@ -267,9 +277,7 @@ export default function CreateVenueModal({
             />
           </div>
           <div className="grid gap-2">
-            <label className="text-ocean text-sm font-semibold">
-              Rating out of 5
-            </label>
+            <label className="text-ocean text-sm font-semibold">Rating out of 5</label>
             <input
               type="number"
               min="0"
