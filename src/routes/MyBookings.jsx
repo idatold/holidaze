@@ -1,4 +1,3 @@
-// src/routes/MyBookings.jsx
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { api, API_BASE } from "@/lib/api";
@@ -15,15 +14,14 @@ const HOLIDAZE_PREFIX = baseEndsWithHolidaze ? "" : "/holidaze";
 const h = (p) => `${HOLIDAZE_PREFIX}${p}`;
 
 export default function MyBookings() {
-  // Still read these to build the endpoint + greet the user
+
   const authed = !!getAccessToken();
   const name = getStoredName();
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState({}); // { [bookingId]: true }
+  const [deleting, setDeleting] = useState({}); 
 
-  // sorting state
   const [activeSort, setActiveSort] = useState("startAsc");
   const [pastSort, setPastSort] = useState("endDesc");
 
@@ -36,8 +34,7 @@ export default function MyBookings() {
   useEffect(() => {
     let alive = true;
 
-    // With RequireAuth guarding this route, authed should always be true.
-    // Keep a soft check + message in case localStorage is cleared.
+  
     if (!authed || !name) {
       setLoading(false);
       toast.error("We couldn’t detect your profile — please log in again.");
@@ -74,7 +71,7 @@ export default function MyBookings() {
     };
   }, [authed, name]);
 
-  // Split into Active (not expired) vs Past (expired)
+
   const { active, past } = useMemo(() => {
     const a = [];
     const p = [];
