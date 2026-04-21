@@ -7,7 +7,7 @@
 
 A modern venue booking app built with **React + Vite**, styled with **Tailwind**, and powered by the **Noroff Holidaze v2 API**. Search venues, view details, check availability, and book your stay. Manage your profile, bookings, and venues with a clean, responsive UI.
 
-**Live demo:** (https://holidazeidatold.netlify.app/) 
+**Live demo:** https://holidazeidatold.netlify.app/
 **API docs:** https://v2.api.noroff.dev/docs
 
 ---
